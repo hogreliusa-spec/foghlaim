@@ -1,0 +1,861 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Foghlaim Gaeilge</title>
+<meta name="description" content="Learn Irish step by step: basics, sentences and grammar, with spaced-repetition review.">
+<meta name="theme-color" content="#24477A">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Foghlaim">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Literata:opsz,wght@7..72,400;600&family=Uncial+Antiqua&display=swap">
+<style>
+/* Layout: one calm reading column; a "path" of numbered units grouped into three stages, with a focused full-column session mode. */
+:root{
+  --bg:#EDF0EA; --surface:#F8F9F5; --ink:#1B2420; --muted:#5B6862; --line:#D2D9CF;
+  --accent:#24477A; --accent-ink:#FFFFFF; --accent-soft:#DCE5F2;
+  --gorse:#9A6E07; --good:#2D7646; --good-soft:#DCEFE1; --bad:#AE3A2E; --bad-soft:#F7E1DD; --mark:#F2D873;
+  --f-display:"Uncial Antiqua", "Palatino Linotype", Georgia, serif;
+  --f-ga:"Literata", Georgia, "Times New Roman", serif;
+  --f-ui:"Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#111714; --surface:#19211D; --ink:#E3E9E3; --muted:#9AA79F; --line:#2D3933;
+  --accent:#93B4E8; --accent-ink:#0E1828; --accent-soft:#1F2D44;
+  --gorse:#E3B341; --good:#6EC28C; --good-soft:#173020; --bad:#EE8B7F; --bad-soft:#3B1F1B; --mark:#5D4C10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111714; --surface:#19211D; --ink:#E3E9E3; --muted:#9AA79F; --line:#2D3933;
+  --accent:#93B4E8; --accent-ink:#0E1828; --accent-soft:#1F2D44;
+  --gorse:#E3B341; --good:#6EC28C; --good-soft:#173020; --bad:#EE8B7F; --bad-soft:#3B1F1B; --mark:#5D4C10; color-scheme:dark}
+
+*{box-sizing:border-box}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-ui);font-size:16px;line-height:1.5;padding-inline:16px;padding-block:0 48px}
+.wrap{max-width:760px;margin:0 auto}
+button{font:inherit;color:inherit;cursor:pointer}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.ga{font-family:var(--f-ga)}
+mark{background:var(--mark);color:var(--ink);border-radius:3px;padding:0 1px}
+
+/* header */
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:28px 14px}
+.brand h1{font-family:var(--f-display);font-weight:400;font-size:2.4rem;line-height:1;margin:0;letter-spacing:.01em}
+.brand p{margin:6px 0 0;color:var(--muted);font-size:.95rem}
+.streak{display:flex;gap:14px;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.streak b{color:var(--ink);font-size:1.05rem}
+.streak .hot b{color:var(--gorse)}
+nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
+nav.tabs button{background:none;border:0;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;font-weight:700;font-size:.95rem}
+nav.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+nav.tabs .count{display:inline-block;min-width:1.5em;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:.78rem;font-variant-numeric:tabular-nums}
+
+/* buttons */
+.btn{border:1px solid var(--line);background:var(--surface);padding:10px 18px;border-radius:10px;font-weight:700}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.small{padding:6px 12px;font-size:.9rem}
+.link{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline}
+
+/* today */
+.today{display:grid;grid-template-columns:1fr auto;gap:16px 24px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:36px}
+.today .eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.today .next{font-size:1.5rem;margin:2px 0 0}
+.today .next small{font-family:var(--f-ui);font-size:.95rem;color:var(--muted);margin-left:8px}
+.today .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.goal{grid-column:1/-1;display:flex;align-items:center;gap:12px;font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);border-radius:99px}
+@media (max-width:560px){.today{grid-template-columns:1fr}.today .actions{justify-content:flex-start}}
+
+/* stages */
+.stage{margin-bottom:36px}
+.stage-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.stage-head h2{font-family:var(--f-display);font-weight:400;font-size:1.6rem;margin:0}
+.stage-head h2 .en{font-family:var(--f-ui);font-size:.95rem;color:var(--muted);margin-left:10px;font-weight:400}
+.stage-head .frac{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.stage-desc{margin:0 0 10px;color:var(--muted);max-width:62ch;font-size:.95rem}
+ol.units{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.unit{display:grid;grid-template-columns:2.2em minmax(0,1fr) 120px 96px;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line)}
+.unit .num{font-family:var(--f-ga);color:var(--muted);font-variant-numeric:tabular-nums;text-align:right}
+.unit .uname{min-width:0}
+.unit .uname .ga{font-size:1.15rem;display:block;line-height:1.3}
+.unit .uname .en{font-size:.88rem;color:var(--muted)}
+.unit .state{display:flex;flex-direction:column;gap:5px}
+.chip{font-size:.72rem;text-transform:uppercase;letter-spacing:.07em;font-weight:700;color:var(--muted)}
+.chip.mastered{color:var(--good)}
+.chip.learning{color:var(--accent)}
+.unit.locked .uname,.unit.locked .num{opacity:.5}
+.unit .btn{justify-self:end;width:100%}
+@media (max-width:560px){
+  .unit{grid-template-columns:1.8em minmax(0,1fr) auto;row-gap:8px}
+  .unit .state{grid-column:2/3;grid-row:2}
+  .unit .btn{grid-column:3;grid-row:1/3;width:auto}
+}
+
+/* session */
+.session-top{display:flex;align-items:center;gap:14px;padding-block:24px 8px}
+.session-top .bar{height:8px}
+.session-top .ct{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.stage-card{padding-block:28px 12px;min-height:300px}
+.eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin:0 0 10px}
+.prompt{font-size:2rem;line-height:1.25;margin:0 0 6px;text-wrap:balance}
+.prompt.en{font-family:var(--f-ui);font-weight:700;font-size:1.6rem}
+.gloss{color:var(--muted);font-size:1.05rem;margin:0 0 6px}
+.note{max-width:60ch;color:var(--ink);background:var(--surface);border-left:3px solid var(--gorse);padding:10px 14px;border-radius:0 8px 8px 0;margin:16px 0 0;font-size:.95rem}
+.words{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:2.2rem;line-height:1.25;margin:0 0 8px}
+.words a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:6px;text-decoration-thickness:2px}
+.words a:hover{text-decoration-color:var(--accent)}
+.hint{font-size:.85rem;color:var(--muted)}
+.options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+@media (max-width:560px){.options{grid-template-columns:1fr}}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:14px 16px;font-size:1.08rem;min-width:0}
+.opt .k{flex:none;width:1.6em;height:1.6em;border-radius:6px;border:1px solid var(--line);display:grid;place-items:center;font-size:.78rem;color:var(--muted);font-family:var(--f-ui)}
+.opt.ga{font-family:var(--f-ga)}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt.right{border-color:var(--good);background:var(--good-soft)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.opt:disabled{cursor:default}
+form.typer{margin-top:24px;display:flex;flex-direction:column;gap:10px;max-width:520px}
+form.typer input{font-family:var(--f-ga);font-size:1.4rem;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);width:100%}
+form.typer input:focus{border-color:var(--accent);outline:none}
+.fadas{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.fadas button{font-family:var(--f-ga);font-size:1.1rem;width:2.4em;height:2.2em;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.fadas span{font-size:.8rem;color:var(--muted);margin-right:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.feedback{margin-top:24px;border-radius:14px;padding:18px 20px;border:1.5px solid}
+.feedback.ok{background:var(--good-soft);border-color:var(--good)}
+.feedback.no{background:var(--bad-soft);border-color:var(--bad)}
+.feedback h3{margin:0 0 6px;font-size:1.05rem}
+.feedback.ok h3{color:var(--good)} .feedback.no h3{color:var(--bad)}
+.feedback .ans{font-family:var(--f-ga);font-size:1.5rem;margin:0}
+.feedback .sub{margin:2px 0 0;color:var(--muted)}
+.feedback .listen{margin:10px 0 0;font-size:.88rem}
+.feedback .listen a{margin-right:10px}
+.feedback .row{margin-top:14px;justify-content:space-between}
+.examples{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:8px;max-width:520px}
+.examples li{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:baseline;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:10px}
+.examples .from{color:var(--muted)} .examples .to{font-family:var(--f-ga);font-size:1.15rem}
+.rule-text{max-width:62ch;font-size:1.05rem}
+.summary{text-align:left;padding-block:40px}
+.summary h2{font-family:var(--f-display);font-weight:400;font-size:2.4rem;margin:0 0 6px}
+.summary .score{font-size:1.1rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* sounds + progress */
+.prose{max-width:66ch}
+.prose h2{font-family:var(--f-display);font-weight:400;font-size:1.5rem;margin:32px 0 6px}
+.prose h2:first-child{margin-top:0}
+.tbl{overflow-x:auto;margin:12px 0}
+table{border-collapse:collapse;width:100%;font-size:.95rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+td.g{font-family:var(--f-ga);font-size:1.05rem;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:28px}
+@media (max-width:560px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:1.8rem;font-variant-numeric:tabular-nums;line-height:1.1}
+.stat span{font-size:.82rem;color:var(--muted)}
+.stagebars{display:grid;gap:14px;margin-bottom:32px}
+.stagebars .lbl{display:flex;justify-content:space-between;font-size:.92rem;margin-bottom:4px;font-variant-numeric:tabular-nums}
+.settings{border-top:1px solid var(--line);padding-top:20px;display:grid;gap:16px;max-width:62ch}
+.settings label{display:flex;gap:10px;align-items:flex-start}
+.settings input[type=checkbox]{width:1.15em;height:1.15em;margin-top:.2em;accent-color:var(--accent)}
+.muted{color:var(--muted)}
+.confirm{background:var(--bad-soft);border:1px solid var(--bad);border-radius:10px;padding:12px 14px}
+@media (prefers-reduced-motion:no-preference){.bar span{transition:width .3s ease}.stage-card{animation:rise .25s ease}}
+@keyframes rise{from{transform:translateY(6px)}to{transform:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ---------------- Course content ----------------
+   vocab item: [irish (alternatives split by |), english, note?]
+   drill item: [prompt, answer, english, rule, wrong1, wrong2]            */
+const STAGES = [
+{ id:1, ga:"Bunús", en:"Basics", desc:"Everyday words and greetings. Learn to recognise them, then to produce them.", units:[
+ { id:"greet", ga:"Beannachtaí", en:"Greetings & courtesies", kind:"vocab",
+   tip:"Irish greetings are blessings: Dia duit literally means “God to you”.",
+   items:[
+   ["Dia duit","Hello (to one person)","Literally “God to you”. The reply is Dia is Muire duit."],
+   ["Dia daoibh","Hello (to a group)"],
+   ["Dia is Muire duit","Hello (in reply)","“God and Mary to you”."],
+   ["Conas atá tú?","How are you?","Munster and the standard. Connacht says Cén chaoi a bhfuil tú? and Ulster Cad é mar atá tú?"],
+   ["Tá mé go maith|Táim go maith","I am well","Táim is the one-word form, common in Munster."],
+   ["Go raibh maith agat","Thank you","To several people: go raibh maith agaibh."],
+   ["Le do thoil","Please"],
+   ["Fáilte","Welcome"],
+   ["Slán","Goodbye"],
+   ["Slán go fóill","Bye for now"],
+   ["Oíche mhaith","Good night"],
+   ["Cad is ainm duit?","What is your name?"],
+   ["Is mise …","I am … (my name is)","Is mise Siobhán = I am Siobhán."],
+   ["Gabh mo leithscéal","Excuse me"]
+ ]},
+ { id:"num", ga:"Uimhreacha", en:"Numbers 0–10", kind:"vocab",
+   tip:"These are counting numbers, said with a: a haon, a dó, a trí. With nouns they change (dhá chat = two cats), which comes later.",
+   items:[
+   ["náid","zero"],["a haon","one"],["a dó","two"],["a trí","three"],["a ceathair","four"],["a cúig","five"],
+   ["a sé","six"],["a seacht","seven"],["a hocht","eight","The h- stops a and ocht running together."],["a naoi","nine"],["a deich","ten"]
+ ]},
+ { id:"fam", ga:"Daoine", en:"People & family", kind:"vocab",
+   tip:"Irish has no word for “a”: fear means both “man” and “a man”.",
+   items:[
+   ["fear","man"],["bean","woman"],["páiste","child"],["cailín","girl"],["buachaill","boy"],
+   ["máthair","mother"],["athair","father"],["deartháir","brother"],["deirfiúr","sister"],
+   ["seanmháthair","grandmother"],["seanathair","grandfather"],["cara","friend"],["clann","children (of a family)"]
+ ]},
+ { id:"things", ga:"Rudaí", en:"Everyday things", kind:"vocab",
+   tip:"Nouns are masculine or feminine. You’ll need that in Stage 3, so notice the (m) and (f) notes when they come up.",
+   items:[
+   ["teach","house","(m)"],["doras","door","(m)"],["fuinneog","window","(f)"],["bord","table","(m)"],["cathaoir","chair","(f)"],
+   ["leabhar","book","(m)"],["madra","dog","(m)"],["cat","cat","(m)"],["carr","car","(m)"],
+   ["uisce","water","(m)"],["bainne","milk","(m)"],["arán","bread","(m)"],["tae","tea","(m)"],["bia","food","(m)"]
+ ]},
+ { id:"adj", ga:"Dathanna", en:"Colours & describing words", kind:"vocab",
+   tip:"Adjectives usually follow the noun: madra mór = a big dog, teach bán = a white house.",
+   items:[
+   ["dearg","red"],["gorm","blue"],["glas","green (of nature)","Grass and fields are glas. Bright, artificial green is uaine."],["uaine","bright green"],
+   ["buí","yellow"],["dubh","black"],["bán","white"],["mór","big"],["beag","small"],
+   ["maith","good"],["olc","bad"],["te","hot"],["fuar","cold"],["sean","old"],["óg","young"]
+ ]},
+ { id:"days", ga:"Laethanta", en:"Days & time words", kind:"vocab",
+   tip:"Day names take the article an. To say “on Monday”, use Dé Luain, Dé Máirt and so on.",
+   items:[
+   ["an Luan","Monday","On Monday: Dé Luain."],["an Mháirt","Tuesday"],["an Chéadaoin","Wednesday"],["an Déardaoin","Thursday"],
+   ["an Aoine","Friday"],["an Satharn","Saturday"],["an Domhnach","Sunday"],
+   ["inniu","today"],["inné","yesterday"],["amárach","tomorrow"],["anois","now"]
+ ]}
+]},
+{ id:2, ga:"Abairtí", en:"Sentences", desc:"How Irish builds sentences: verb first, and feelings, possessions and likes expressed with prepositions.", units:[
+ { id:"bi", ga:"An briathar bí", en:"“To be”: tá and níl", kind:"vocab",
+   tip:"Irish puts the verb first. Tá mé = I am. The negative is níl, and questions start with An bhfuil…?",
+   items:[
+   ["Tá mé|Táim","I am"],["Tá tú","you are"],["Tá sé","he is / it is"],["Tá sí","she is"],
+   ["Tá muid|Táimid","we are"],["Tá sibh","you (plural) are"],["Tá siad","they are"],
+   ["Níl mé|Nílim","I am not"],["An bhfuil tú?","Are you?","Answer with the verb: Tá (yes) or Níl (no). Irish has no single word for yes or no."],
+   ["Bhí mé","I was"],["Beidh mé","I will be"]
+ ]},
+ { id:"agam", ga:"Tá … agam", en:"Having things", kind:"vocab",
+   tip:"There is no verb “to have”. Something is at you: Tá carr agam = there is a car at me.",
+   items:[
+   ["Tá carr agam","I have a car"],["Tá madra agat","You have a dog"],["Tá teach aige","He has a house"],
+   ["Tá cat aici","She has a cat"],["Tá airgead againn","We have money"],["Tá leabhar agaibh","You (plural) have a book"],
+   ["Tá bia acu","They have food"],["Níl carr agam","I don't have a car"],["An bhfuil peann agat?","Do you have a pen?"]
+ ]},
+ { id:"orm", ga:"Tá … orm", en:"Feelings", kind:"vocab",
+   tip:"Many feelings are on you: Tá ocras orm = hunger is on me. Orm (on me), ort (on you), air (on him), uirthi (on her).",
+   items:[
+   ["Tá ocras orm","I'm hungry"],["Tá tart orm","I'm thirsty"],["Tá tuirse orm","I'm tired"],
+   ["Tá áthas orm","I'm happy"],["Tá brón orm","I'm sorry / I'm sad"],["Tá eagla orm","I'm afraid"],
+   ["Tá fearg orm","I'm angry"],["Tá slaghdán orm","I have a cold"],["An bhfuil ocras ort?","Are you hungry?"],
+   ["Tá tuirse air","He's tired"],["Tá ocras uirthi","She's hungry"]
+ ]},
+ { id:"liom", ga:"Is maith liom", en:"Likes & wants", kind:"vocab",
+   tip:"Likes use le (with): Is maith liom tae = tea is good with me. Liom (with me), leat (with you), leis (with him), léi (with her).",
+   items:[
+   ["Is maith liom tae","I like tea"],["Ní maith liom caife","I don't like coffee"],["An maith leat ceol?","Do you like music?"],
+   ["Is breá liom an fharraige","I love the sea"],["Is fearr liom bainne","I prefer milk"],
+   ["Ba mhaith liom cupán tae","I'd like a cup of tea"],["Ar mhaith leat caife?","Would you like coffee?"],
+   ["Is maith léi seacláid","She likes chocolate"],["Is maith leis peil","He likes football"]
+ ]},
+ { id:"q", ga:"Ceisteanna", en:"Asking questions", kind:"vocab",
+   tip:"Cá (where) is followed by bhfuil, not tá: Cá bhfuil tú? = Where are you?",
+   items:[
+   ["Cad é sin?","What is that?"],["Cé hé sin?","Who is that? (a man)"],["Cá bhfuil tú?","Where are you?"],
+   ["Cathain?","When?"],["Conas?","How?"],["Cén fáth?","Why?"],["Cé mhéad atá air?","How much is it?"],
+   ["Cá bhfuil an leithreas?","Where is the toilet?"],["Cén t-am é?","What time is it?"],["Cad as duit?","Where are you from?","Answer: Is as Corcaigh mé = I'm from Cork."]
+ ]},
+ { id:"aimsir", ga:"An aimsir", en:"The weather", kind:"vocab",
+   tip:"Weather uses Tá sé, “it is”. Rain and snow are things being “put”: ag cur báistí.",
+   items:[
+   ["Tá sé fuar","It's cold"],["Tá sé te","It's hot"],["Tá sé ag cur báistí","It's raining"],
+   ["Tá sé grianmhar","It's sunny"],["Tá sé gaofar","It's windy"],["Tá sé scamallach","It's cloudy"],
+   ["Tá sé ag cur sneachta","It's snowing"],["Lá breá","A fine day"],["Tá an lá go hálainn","The day is lovely"]
+ ]}
+]},
+{ id:3, ga:"Gramadach", en:"Grammar", desc:"The mutations that change the start of words, the article, and verbs in three tenses.", units:[
+ { id:"seimhiu", ga:"Séimhiú", en:"Lenition after mo, do, a", kind:"drill", hl:true, ask:"Put them together",
+   tip:"Séimhiú (lenition) adds an h after the first consonant: b → bh, c → ch, m → mh. It follows mo (my), do (your) and a (his). L, n, r and sc, sm, sp, st never show it. Before a vowel, mo and do shorten to m' and d'. A meaning “her” doesn’t lenite, but adds h- to a vowel.",
+   items:[
+   ["mo + bróg","mo bhróg","my shoe","b → bh after mo","mo bróg","mo mbróg"],
+   ["do + cara","do chara","your friend","c → ch after do","do cara","do gcara"],
+   ["a (his) + teach","a theach","his house","a meaning “his” lenites","a teach","a dteach"],
+   ["a (her) + teach","a teach","her house","a meaning “her” leaves consonants alone","a theach","a dteach"],
+   ["mo + máthair","mo mháthair","my mother","m → mh","mo máthair","mo bmáthair"],
+   ["do + peann","do pheann","your pen","p → ph, said like f","do peann","do bpeann"],
+   ["mo + gúna","mo ghúna","my dress","g → gh","mo gúna","mo ngúna"],
+   ["mo + deartháir","mo dheartháir","my brother","d → dh","mo deartháir","mo ndeartháir"],
+   ["do + fón","do fhón","your phone","f → fh, which is silent","do fón","do bhfón"],
+   ["mo + seomra","mo sheomra","my room","s → sh, said like h","mo seomra","mo tseomra"],
+   ["mo + athair","m'athair","my father","mo becomes m' before a vowel","mo athair","mo hathair"],
+   ["do + uncail","d'uncail","your uncle","do becomes d' before a vowel","do uncail","do n-uncail"],
+   ["a (her) + athair","a hathair","her father","a meaning “her” adds h- to a vowel","a athair","a n-athair"],
+   ["mo + leabhar","mo leabhar","my book","l, n and r don’t show lenition in writing","mo lheabhar","m'leabhar"],
+   ["mo + scoil","mo scoil","my school","sc, sm, sp and st never lenite","mo schoil","m'scoil"]
+ ]},
+ { id:"uru", ga:"Urú", en:"Eclipsis after ár, bhur, a, i", kind:"drill", hl:true, ask:"Put them together",
+   tip:"Urú (eclipsis) puts a new sound in front of the word: b → mb, c → gc, d → nd, f → bhf, g → ng, p → bp, t → dt, and a vowel takes n-. It follows ár (our), bhur (your, plural), a (their) and i (in). You pronounce only the new letter: ár mbád sounds like “ár mád”.",
+   items:[
+   ["ár + bád","ár mbád","our boat","b → mb","ár bád","ár bhád"],
+   ["ár + cat","ár gcat","our cat","c → gc","ár cat","ár chat"],
+   ["bhur + teach","bhur dteach","your (plural) house","t → dt","bhur teach","bhur theach"],
+   ["a (their) + doras","a ndoras","their door","d → nd","a doras","a dhoras"],
+   ["ár + gairdín","ár ngairdín","our garden","g → ng","ár gairdín","ár ghairdín"],
+   ["ár + fón","ár bhfón","our phone","f → bhf","ár fón","ár fhón"],
+   ["a (their) + páiste","a bpáiste","their child","p → bp","a páiste","a pháiste"],
+   ["ár + athair","ár n-athair","our father","a vowel takes n-","ár athair","ár hathair"],
+   ["a (their) + athair","a n-athair","their father","a meaning “their” eclipses, so a vowel takes n-","a hathair","a athair"],
+   ["i + Corcaigh","i gCorcaigh","in Cork","i (in) eclipses; the capital letter stays","i Corcaigh","i Chorcaigh"],
+   ["i + Gaillimh","i nGaillimh","in Galway","g → ng","i Gaillimh","i Ghaillimh"],
+   ["i + Baile Átha Cliath","i mBaile Átha Cliath","in Dublin","b → mb","i Baile Átha Cliath","i Bhaile Átha Cliath"],
+   ["i + Éirinn","in Éirinn","in Ireland","before a vowel, i becomes in","i nÉirinn","i Éirinn"],
+   ["bhur + seomra","bhur seomra","your (plural) room","l, m, n, r and s are never eclipsed","bhur tseomra","bhur sheomra"]
+ ]},
+ { id:"alt", ga:"An t-alt", en:"The article: an and na", kind:"drill", hl:true, ask:"Say “the …”",
+   tip:"Irish has one word for “the”: an in the singular, na in the plural. After an, feminine nouns lenite (an bhean) and feminine s- becomes ts- (an tsráid). Masculine nouns starting with a vowel take t- (an t-uisce). After na, a vowel takes h- (na húlla).",
+   items:[
+   ["the + fear (m)","an fear","the man","masculine consonant: no change","an fhear","an t-fear"],
+   ["the + bean (f)","an bhean","the woman","feminine nouns lenite after an","an bean","na bean"],
+   ["the + cathaoir (f)","an chathaoir","the chair","feminine: c → ch","an cathaoir","an gcathaoir"],
+   ["the + fuinneog (f)","an fhuinneog","the window","feminine: f → fh, which is silent","an fuinneog","an bhfuinneog"],
+   ["the + uisce (m)","an t-uisce","the water","masculine vowel nouns take t-","an uisce","an huisce"],
+   ["the + úll (m)","an t-úll","the apple","masculine vowel nouns take t-","an úll","an n-úll"],
+   ["the + sráid (f)","an tsráid","the street","feminine s- becomes ts-","an sráid","an shráid"],
+   ["the + siopa (m)","an siopa","the shop","masculine s-: no change","an tsiopa","an shiopa"],
+   ["the + cailín (m)","an cailín","the girl","cailín is grammatically masculine, so no change","an chailín","an gcailín"],
+   ["the + oíche (f)","an oíche","the night","feminine vowel nouns: no change","an t-oíche","an hoíche"],
+   ["the + fir (plural)","na fir","the men","the plural article is na","an fir","na bhfir"],
+   ["the + mná (plural)","na mná","the women","na leaves consonants alone","na mhná","an mná"],
+   ["the + úlla (plural)","na húlla","the apples","na adds h- to a vowel","na úlla","na n-úlla"]
+ ]},
+ { id:"caite", ga:"An aimsir chaite", en:"Past tense", kind:"drill", ask:"Say it in the past tense",
+   tip:"Regular verbs lenite their first consonant: dún → dhún mé (I closed). Vowels and f- take d': d'ól mé, d'fhág mé. The negative is níor + lenition, the question ar. Eleven irregular verbs have their own past forms, and they are the most common verbs, so they're worth learning by heart.",
+   items:[
+   ["dún (close) · I","dhún mé","I closed","lenite the first consonant","dún mé","dúnfaidh mé"],
+   ["ól (drink) · I","d'ól mé","I drank","a vowel takes d'","ól mé","dh'ól mé"],
+   ["fág (leave) · I","d'fhág mé","I left","f: lenite and add d'","fhág mé","d'fág mé"],
+   ["ceannaigh (buy) · I","cheannaigh mé","I bought","c → ch","ceannaigh mé","cheannaíonn mé"],
+   ["léigh (read) · I","léigh mé","I read","l doesn't show lenition in writing","lhéigh mé","d'léigh mé"],
+   ["téigh (go) · I","chuaigh mé","I went","irregular","théigh mé","rachaidh mé"],
+   ["feic (see) · I","chonaic mé","I saw","irregular","d'fheic mé","fheic mé"],
+   ["déan (do, make) · I","rinne mé","I did / I made","irregular","dhéan mé","déanaim"],
+   ["faigh (get) · I","fuair mé","I got","irregular","fhaigh mé","gheobhaidh mé"],
+   ["abair (say) · I","dúirt mé","I said","irregular","d'abair mé","deirim"],
+   ["tar (come) · I","tháinig mé","I came","irregular","thar mé","tagaim"],
+   ["ith (eat) · I","d'ith mé","I ate","irregular, but follows the d' pattern","ith mé","d'ithe mé"],
+   ["tabhair (give) · I","thug mé","I gave","irregular","thabhair mé","tugaim"],
+   ["clois (hear) · I","chuala mé","I heard","irregular","chlois mé","cloisim"],
+   ["dún (close) · I, negative","níor dhún mé","I didn't close","regular negative: níor + lenition","ní dhún mé","níor dún mé"],
+   ["ól (drink) · you, question","ar ól tú?","Did you drink?","regular question: ar","an ól tú?","ar d'ól tú?"],
+   ["téigh (go) · I, negative","ní dheachaigh mé","I didn't go","irregular negative","níor chuaigh mé","ní chuaigh mé"],
+   ["feic (see) · I, negative","ní fhaca mé","I didn't see","irregular negative","níor chonaic mé","ní chonaic mé"]
+ ]},
+ { id:"lath", ga:"An aimsir láithreach", en:"Present tense", kind:"drill", ask:"Say it in the present tense",
+   tip:"For “I”, add -aim (broad stem) or -im (slender stem): dúnaim, cuirim. Verbs ending in -aigh become -aím: ceannaím. Other persons use -ann/-eann plus a pronoun: dúnann tú, cuireann sí. The negative is ní + lenition.",
+   items:[
+   ["dún (close) · I","dúnaim","I close","broad stem: -aim","dúnann","dhúnaim"],
+   ["cuir (put) · I","cuirim","I put","slender stem: -im","cuiraim","chuirim"],
+   ["ól (drink) · I","ólaim","I drink","broad stem: -aim","ólim","d'ólaim"],
+   ["éist (listen) · I","éistim","I listen","slender stem: -im","éistaim","d'éistim"],
+   ["ceannaigh (buy) · I","ceannaím","I buy","-aigh becomes -aím","ceannaighim","cheannaím"],
+   ["dún (close) · she","dúnann sí","she closes","other persons: -ann + pronoun","dúnaim sí","dúnfaidh sí"],
+   ["cuir (put) · you","cuireann tú","you put","slender: -eann + pronoun","cuirann tú","cuirim tú"],
+   ["téigh (go) · I","téim","I go","irregular","théim","rachaim"],
+   ["feic (see) · I","feicim","I see","regular in the present","fheicim","feicaim"],
+   ["déan (do, make) · I","déanaim","I do / I make","regular in the present","rinnim","dhéanaim"],
+   ["abair (say) · I","deirim","I say","irregular","abairim","dúirim"],
+   ["tar (come) · I","tagaim","I come","irregular","taraim","thagaim"],
+   ["ith (eat) · I","ithim","I eat","slender stem: -im","itheaim","d'ithim"],
+   ["dún (close) · I, negative","ní dhúnaim","I don't close","ní + lenition","níor dhúnaim","ní dúnaim"],
+   ["bí (be), habitual · I","bím","I am (usually)","the habitual of bí, for things that happen regularly","táim","bhím"]
+ ]},
+ { id:"fhaist", ga:"An aimsir fháistineach", en:"Future tense", kind:"drill", ask:"Say it in the future tense",
+   tip:"Add -faidh (broad) or -fidh (slender) to the stem: dúnfaidh mé, cuirfidh mé. Verbs ending in -aigh take -óidh: ceannóidh mé. The irregular verbs have their own future stems.",
+   items:[
+   ["dún (close) · I","dúnfaidh mé","I will close","broad stem: -faidh","dúnfidh mé","dhúnfaidh mé"],
+   ["cuir (put) · I","cuirfidh mé","I will put","slender stem: -fidh","cuirfaidh mé","chuirfidh mé"],
+   ["éist (listen) · I","éistfidh mé","I will listen","slender stem: -fidh","éistfaidh mé","d'éistfidh mé"],
+   ["ceannaigh (buy) · I","ceannóidh mé","I will buy","-aigh becomes -óidh","ceannfaidh mé","ceannaíonn mé"],
+   ["téigh (go) · I","rachaidh mé","I will go","irregular","téifidh mé","chuaigh mé"],
+   ["feic (see) · I","feicfidh mé","I will see","slender stem: -fidh","feicfaidh mé","chonaicfidh mé"],
+   ["déan (do, make) · I","déanfaidh mé","I will do / make","broad stem: -faidh","déanfidh mé","rinnfidh mé"],
+   ["faigh (get) · I","gheobhaidh mé","I will get","irregular","faighfidh mé","fuair mé"],
+   ["abair (say) · I","déarfaidh mé","I will say","irregular","abairfidh mé","deirfidh mé"],
+   ["tar (come) · I","tiocfaidh mé","I will come","irregular","tarfaidh mé","tháinig mé"],
+   ["ith (eat) · I","íosfaidh mé","I will eat","irregular","ithfidh mé","d'íosfaidh mé"],
+   ["bí (be) · I","beidh mé","I will be","irregular","bífidh mé","bhí mé"],
+   ["tabhair (give) · I","tabharfaidh mé","I will give","broad stem: -faidh","thabharfaidh mé","tugfaidh mé"],
+   ["dún (close) · I, negative","ní dhúnfaidh mé","I won't close","ní + lenition","níor dhúnfaidh mé","ní dúnfaidh mé"],
+   ["téigh (go) · I, negative","ní rachaidh mé","I won't go","r doesn't show lenition in writing","ní chuaigh mé","níor rachaidh mé"]
+ ]}
+]}
+];
+
+const UNITS = []; const UNIT_BY_ID = {};
+STAGES.forEach(s => s.units.forEach(u => { u.stage = s.id; u.idx = UNITS.length; UNITS.push(u); UNIT_BY_ID[u.id] = u; }));
+
+/* ---------------- State & persistence ---------------- */
+const LS_KEY = "foghlaim-gaeilge-v1";
+const INTERVALS = [0,1,2,4,8,16,32];
+const GOAL = 20;
+function blank(){ return { v:1, items:{}, done:{}, streak:0, lastDay:null, countDay:null, todayCount:0, unlockAll:false, updatedAt:0 }; }
+function today(){ const d = new Date(); return Math.round(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 864e5); }
+let state = blank();
+try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (s && s.v === 1) state = Object.assign(blank(), s); } catch (e) {}
+
+let saveTimer = null;
+function saveLocal(){ try { localStorage.setItem(LS_KEY, JSON.stringify(state)); } catch (e) {} }
+function commit(){ state.updatedAt = Date.now(); saveLocal(); }
+let ioMsg = "";
+function exportProgress(){
+  const blob = new Blob([JSON.stringify(state, null, 1)], { type:"application/json" });
+  const d = new Date(), stamp = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = "foghlaim-progress-" + stamp + ".json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  ioMsg = "Progress file saved. Open it with Import on your other device."; render();
+}
+function importProgress(file){
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const d = JSON.parse(r.result);
+      if (!d || d.v !== 1 || typeof d.items !== "object") throw new Error("bad");
+      pendingImport = Object.assign(blank(), d);
+      ioMsg = ""; render();
+    } catch (e) { ioMsg = "That file isn't a Foghlaim progress file. Choose the .json file you exported."; render(); }
+  };
+  r.readAsText(file);
+}
+let pendingImport = null;
+if (navigator.storage && navigator.storage.persist) { navigator.storage.persist().catch(() => {}); }
+
+/* ---------------- Helpers ---------------- */
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const keyOf = (u, i) => u.id + ":" + i;
+function itemOf(key){
+  const [uid, n] = key.split(":"); const u = UNIT_BY_ID[uid]; if (!u) return null; const raw = u.items[+n]; if (!raw) return null;
+  if (u.kind === "drill") return { key, u, drill:true, prompt:raw[0], ga:raw[1], gaAll:[raw[1]], en:raw[2], note:raw[3], wrongs:[raw[4], raw[5]] };
+  const alts = raw[0].split("|");
+  return { key, u, drill:false, ga:alts[0], gaAll:alts, en:raw[1], note:raw[2] || "" };
+}
+const rec = key => state.items[key];
+function unitStats(u){
+  let seen = 0, pts = 0, mastered = 0;
+  u.items.forEach((_, i) => { const r = rec(keyOf(u, i)); if (r) { seen++; pts += Math.min(r.box, 4); if (r.box >= 4) mastered++; } });
+  return { n:u.items.length, seen, mastered, pct: Math.round(100 * pts / (4 * u.items.length)) };
+}
+const unlocked = u => state.unlockAll || u.idx === 0 || !!state.done[UNITS[u.idx - 1].id];
+function dueKeys(){ const t = today(); return Object.keys(state.items).filter(k => itemOf(k) && state.items[k].due <= t).sort((a, b) => state.items[a].due - state.items[b].due); }
+function bumpDay(){
+  const t = today();
+  if (state.countDay !== t) { state.countDay = t; state.todayCount = 0; }
+  state.todayCount++;
+  if (state.lastDay !== t) { state.streak = (state.lastDay === t - 1) ? state.streak + 1 : 1; state.lastDay = t; }
+}
+const liveStreak = () => (state.lastDay === today() || state.lastDay === today() - 1) ? state.streak : 0;
+const todayCount = () => state.countDay === today() ? state.todayCount : 0;
+function norm(s){ return s.toLowerCase().replace(/[’‘`´]/g, "'").replace(/[?!.,;:…"“”]/g, "").replace(/\s+/g, " ").trim(); }
+const fold = s => norm(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
+function teanglann(w){ return "https://www.teanglann.ie/en/fuaim/" + encodeURIComponent(w.toLowerCase()); }
+function speakWords(it){
+  let src = it.drill ? (it.prompt.includes("+") ? it.prompt.split("+")[1] : it.prompt.split("(")[0]) : it.ga;
+  src = src.replace(/\(.*?\)/g, "").replace(/·.*/, "");
+  const words = src.split(/\s+/).map(w => w.replace(/[?!.,…]/g, "")).filter(Boolean);
+  return it.drill ? words.filter(w => !/^(an|a|mo|do|ár|bhur|i|the)$/i.test(w)) : words;
+}
+function highlight(it){
+  if (!it.u.hl) return esc(it.ga);
+  const base = it.prompt.split("+")[1].replace(/\(.*?\)/g, "").trim();
+  const A = it.ga, tail = base.slice(1).toLowerCase();
+  const idx = tail ? A.toLowerCase().lastIndexOf(tail) : -1;
+  if (idx < 1) return esc(A);
+  const ws = A.lastIndexOf(" ", idx - 1) + 1, pre = A.slice(ws, idx), first = base[0].toLowerCase();
+  let out = "", used = false;
+  for (const ch of pre) { if (!used && ch.toLowerCase() === first) { out += esc(ch); used = true; } else out += "<mark>" + esc(ch) + "</mark>"; }
+  return esc(A.slice(0, ws)) + out.replace(/<\/mark><mark>/g, "") + esc(A.slice(idx));
+}
+
+/* ---------------- Sessions ---------------- */
+let view = "path", session = null, confirmReset = false;
+try { const v = localStorage.getItem(LS_KEY + "-view"); if (["path","review","sounds","progress"].includes(v)) view = v; } catch (e) {}
+
+function exerciseFor(key, mode){
+  const it = itemOf(key), r = rec(key), box = r ? r.box : 0;
+  if (it.drill) return { t: box >= 2 && mode !== "lesson" ? "type" : "mcq", key };
+  if (mode === "lesson") return { t:"mcq", dir:"ga-en", key };
+  if (box <= 1) return { t:"mcq", dir: Math.random() < .5 ? "ga-en" : "en-ga", key };
+  if (box === 2) return { t:"mcq", dir:"en-ga", key };
+  return { t:"type", key };
+}
+function buildOptions(step){
+  const it = itemOf(step.key);
+  if (it.drill) return shuffle([it.ga, ...it.wrongs].map(x => ({ text:x, ok:x === it.ga })));
+  const field = step.dir === "ga-en" ? "en" : "ga";
+  const others = shuffle(it.u.items.map((_, i) => itemOf(keyOf(it.u, i))).filter(o => o.key !== it.key && o[field] !== it[field])).slice(0, 3);
+  return shuffle([it, ...others].map(o => ({ text:o[field], ok:o.key === it.key })));
+}
+function startLesson(idx){
+  const u = UNITS[idx], steps = [];
+  if (u.kind === "drill") steps.push({ t:"rule", u: u.id });
+  const keys = u.items.map((_, i) => keyOf(u, i));
+  for (let c = 0; c < keys.length; c += 4) {
+    const chunk = keys.slice(c, c + 4);
+    if (u.kind !== "drill") chunk.forEach(k => steps.push({ t:"intro", key:k }));
+    shuffle(chunk).forEach(k => steps.push(exerciseFor(k, "lesson")));
+  }
+  openSession({ mode:"lesson", unit:u.id, steps });
+}
+function startReview(keys, label){
+  const steps = shuffle(keys.slice(0, 20)).map(k => exerciseFor(k, "review"));
+  if (!steps.length) return;
+  openSession({ mode:"review", label, steps });
+}
+function practiceUnit(idx){
+  const u = UNITS[idx];
+  const keys = u.items.map((_, i) => keyOf(u, i)).sort((a, b) => (rec(a)?.box ?? 0) - (rec(b)?.box ?? 0));
+  startReview(keys.slice(0, 12), u.ga);
+}
+function weakKeys(){ return Object.keys(state.items).filter(k => itemOf(k)).sort((a, b) => state.items[a].box - state.items[b].box || state.items[a].due - state.items[b].due).slice(0, 12); }
+function openSession(s){
+  session = Object.assign({ pos:0, right:0, answered:0, missed:{}, retries:{}, fb:null, opts:null }, s);
+  prepStep(); render(); window.scrollTo(0, 0);
+}
+function prepStep(){
+  const st = session.steps[session.pos];
+  session.fb = null; session.opts = st && st.t === "mcq" ? buildOptions(st) : null;
+}
+function grade(ok, given, near){
+  const st = session.steps[session.pos], key = st.key, t = today();
+  const r = state.items[key] || { box:0, due:t, right:0, wrong:0 };
+  const first = !session.missed[key];
+  if (ok) {
+    r.right++;
+    if (first) {
+      if (session.mode === "lesson") { r.box = Math.max(r.box, 1); }
+      else { r.box = Math.min(6, r.box + 1); }
+      r.due = t + INTERVALS[r.box];
+    }
+    session.right += first ? 1 : 0;
+  } else {
+    r.wrong++; r.box = session.mode === "lesson" ? 0 : 1; r.due = t;
+    session.missed[key] = true;
+    session.retries[key] = (session.retries[key] || 0) + 1;
+    if (session.retries[key] <= 2) {
+      const again = st.t === "type" ? { t:"mcq", dir:"en-ga", key } : Object.assign({}, st);
+      session.steps.push(again);
+    }
+  }
+  if (first) session.answered++;
+  state.items[key] = r;
+  bumpDay(); commit();
+  session.fb = { ok, given, near };
+  render();
+}
+function next(){
+  session.pos++;
+  if (session.pos >= session.steps.length) {
+    if (session.mode === "lesson") { state.done[session.unit] = true; commit(); }
+    session.finished = true;
+  } else prepStep();
+  render(); window.scrollTo(0, 0);
+}
+function endSession(){ session = null; render(); }
+
+/* ---------------- Rendering ---------------- */
+const app = document.getElementById("app");
+function render(){ app.innerHTML = session ? renderSession() : renderShell(); afterRender(); }
+
+function renderShell(){
+  const due = dueKeys().length, st = liveStreak();
+  const tab = (id, label, extra = "") => `<button data-act="tab" data-v="${id}" ${view === id ? 'aria-current="page"' : ""}>${label}${extra}</button>`;
+  return `
+  <header class="top">
+    <div class="brand"><h1>Foghlaim</h1><p>Irish, one step at a time</p></div>
+    <div class="streak"><span class="${st ? "hot" : ""}"><b>${st}</b> day streak</span><span><b>${todayCount()}</b>/${GOAL} today</span></div>
+  </header>
+  <nav class="tabs" aria-label="Sections">
+    ${tab("path", "Path")}${tab("review", "Review", due ? `<span class="count">${due}</span>` : "")}${tab("sounds", "Sounds")}${tab("progress", "Progress")}
+  </nav>
+  <main>${view === "path" ? renderPath() : view === "review" ? renderReview() : view === "sounds" ? renderSounds() : renderProgress()}</main>`;
+}
+
+function renderPath(){
+  const due = dueKeys().length;
+  const nextU = UNITS.find(u => unlocked(u) && !state.done[u.id]);
+  const tc = todayCount();
+  const today = `
+  <section class="today">
+    <div>
+      <div class="eyebrow">${nextU ? (Object.keys(state.done).length ? "Next lesson" : "Start here") : "Every lesson done"}</div>
+      <p class="next ga">${nextU ? esc(nextU.ga) + `<small>${esc(nextU.en)}</small>` : "Maith thú!<small>Keep reviewing to master it all</small>"}</p>
+    </div>
+    <div class="actions">
+      ${due ? `<button class="btn" data-act="review">Review ${due} due</button>` : ""}
+      ${nextU ? `<button class="btn primary" data-act="lesson" data-u="${nextU.idx}">${state.done[nextU.id] ? "Continue" : "Start lesson"}</button>` : `<button class="btn primary" data-act="weak">Practise weakest</button>`}
+    </div>
+    <div class="goal"><span>Daily goal</span><div class="bar"><span style="width:${Math.min(100, tc / GOAL * 100)}%"></span></div><span>${tc}/${GOAL} answers</span></div>
+  </section>`;
+  return today + STAGES.map(s => {
+    const doneN = s.units.filter(u => state.done[u.id]).length;
+    return `<section class="stage">
+      <div class="stage-head"><h2>Céim ${s.id} · ${esc(s.ga)}<span class="en">${esc(s.en)}</span></h2><span class="frac">${doneN} of ${s.units.length} lessons</span></div>
+      <p class="stage-desc">${esc(s.desc)}</p>
+      <ol class="units">${s.units.map(u => unitRow(u)).join("")}</ol>
+    </section>`;
+  }).join("");
+}
+function unitRow(u){
+  const st = unitStats(u), open = unlocked(u), done = !!state.done[u.id];
+  const status = !open ? "Locked" : !done ? (st.seen ? "In progress" : "New") : st.mastered === st.n ? "Mastered" : "Learning";
+  const cls = status === "Mastered" ? "mastered" : status === "Learning" ? "learning" : "";
+  const btn = !open ? `<button class="btn small" disabled>Locked</button>`
+    : !done ? `<button class="btn small primary" data-act="lesson" data-u="${u.idx}">Start</button>`
+    : `<button class="btn small" data-act="practice" data-u="${u.idx}">Practise</button>`;
+  return `<li class="unit ${open ? "" : "locked"}">
+    <span class="num">${u.idx + 1}</span>
+    <div class="uname"><span class="ga">${esc(u.ga)}</span><span class="en">${esc(u.en)} · ${u.items.length} ${u.kind === "drill" ? "drills" : "items"}</span></div>
+    <div class="state"><span class="chip ${cls}">${status}</span><div class="bar" title="${st.pct}% mastered"><span style="width:${st.pct}%"></span></div></div>
+    ${btn}
+  </li>`;
+}
+
+function renderReview(){
+  const due = dueKeys(), seen = Object.keys(state.items).length;
+  const byUnit = {};
+  due.forEach(k => { const u = itemOf(k).u; byUnit[u.id] = (byUnit[u.id] || 0) + 1; });
+  return `<div class="prose">
+    <h2>${due.length ? `${due.length} to review` : "All caught up"}</h2>
+    <p>Words you've learned come back for review just before you'd forget them: after a day, then two, four, eight and so on. Get one wrong and it starts again from the next day.</p>
+    ${due.length ? `<div class="row" style="margin:16px 0 8px"><button class="btn primary" data-act="review">Review ${Math.min(20, due.length)} now</button>${due.length > 20 ? `<span class="muted">Sessions take 20 at a time.</span>` : ""}</div>
+      <div class="tbl"><table><thead><tr><th>Lesson</th><th>Due</th></tr></thead><tbody>${Object.entries(byUnit).map(([id, n]) => `<tr><td class="g">${esc(UNIT_BY_ID[id].ga)} <span class="muted" style="font-family:var(--f-ui);font-size:.85rem">${esc(UNIT_BY_ID[id].en)}</span></td><td>${n}</td></tr>`).join("")}</tbody></table></div>`
+    : seen ? `<p class="muted">Nothing is due today. You can still practise the items you know least well.</p><button class="btn" data-act="weak">Practise weakest 12</button>`
+    : `<p class="muted">Finish your first lesson and its words will appear here tomorrow.</p><button class="btn primary" data-act="lesson" data-u="0">Start lesson 1</button>`}
+  </div>`;
+}
+
+function renderSounds(){
+  return `<div class="prose">
+  <h2>How Irish spelling sounds</h2>
+  <p>Irish spelling looks long, but it's regular once you know a few rules. These notes follow the written standard; pronunciation differs between Connacht, Munster and Ulster, and every one is correct. Pick the dialect you hear most and copy it. In lessons, tap any Irish word to hear native speakers from all three on teanglann.ie.</p>
+
+  <h2>The fada</h2>
+  <p>The accent (síneadh fada, “long mark”) lengthens a vowel and changes the meaning: <span class="ga">sean</span> means old, <span class="ga">Seán</span> is a name. Always write it.</p>
+  <div class="tbl"><table><thead><tr><th>Letter</th><th>Sounds like</th><th>Example</th></tr></thead><tbody>
+    <tr><td class="g">á</td><td>“aw” in <i>law</i></td><td class="g">fáilte</td></tr>
+    <tr><td class="g">é</td><td>“ay” in <i>day</i></td><td class="g">inné</td></tr>
+    <tr><td class="g">í</td><td>“ee” in <i>see</i></td><td class="g">buí</td></tr>
+    <tr><td class="g">ó</td><td>“oh” in <i>go</i></td><td class="g">óg</td></tr>
+    <tr><td class="g">ú</td><td>“oo” in <i>too</i></td><td class="g">dún</td></tr>
+  </tbody></table></div>
+
+  <h2>Broad and slender</h2>
+  <p>Every consonant is either broad (next to a, o, u) or slender (next to e, i). Slender consonants are said with the tongue raised, as if a faint “y” follows. That's why spelling follows the rule <span class="ga">caol le caol, leathan le leathan</span>: “slender with slender, broad with broad”. A few vowels are often there just to show which kind a consonant is.</p>
+  <p>The clearest example is s: broad <span class="ga">suí</span> (sitting) sounds like “see”, slender <span class="ga">sí</span> (she) sounds like “shee”. Slender t and d move towards “ch” and “j”, so <span class="ga">tine</span> (fire) is close to “chinna”.</p>
+
+  <h2>Lenition (séimhiú)</h2>
+  <p>A consonant followed by h is softened. You'll meet these in Stage 1 and drill them in Stage 3.</p>
+  <div class="tbl"><table><thead><tr><th>Written</th><th>Sound</th><th>Example</th></tr></thead><tbody>
+    <tr><td class="g">bh, mh</td><td>“w” when broad (often “v” in Munster), “v” when slender</td><td class="g">mo bhróg, mo mháthair</td></tr>
+    <tr><td class="g">ch</td><td>the “ch” of Scottish <i>loch</i>; slender like German <i>ich</i></td><td class="g">do chara</td></tr>
+    <tr><td class="g">dh, gh</td><td>a soft throaty sound when broad, “y” when slender; often silent at the end of a word</td><td class="g">mo ghúna, mo dheartháir</td></tr>
+    <tr><td class="g">fh</td><td>silent</td><td class="g">an fhuinneog</td></tr>
+    <tr><td class="g">ph</td><td>“f”</td><td class="g">do pheann</td></tr>
+    <tr><td class="g">sh, th</td><td>“h”</td><td class="g">mo sheomra, a theach</td></tr>
+  </tbody></table></div>
+
+  <h2>Eclipsis (urú)</h2>
+  <p>A new letter is written in front of the word and you say only the new one.</p>
+  <div class="tbl"><table><thead><tr><th>Written</th><th>Say</th><th>Example</th></tr></thead><tbody>
+    <tr><td class="g">mb</td><td>m</td><td class="g">ár mbád</td></tr>
+    <tr><td class="g">gc</td><td>g</td><td class="g">i gCorcaigh</td></tr>
+    <tr><td class="g">nd</td><td>n</td><td class="g">a ndoras</td></tr>
+    <tr><td class="g">bhf</td><td>w or v</td><td class="g">ár bhfón</td></tr>
+    <tr><td class="g">ng</td><td>“ng” as in <i>sing</i></td><td class="g">i nGaillimh</td></tr>
+    <tr><td class="g">bp</td><td>b</td><td class="g">a bpáiste</td></tr>
+    <tr><td class="g">dt</td><td>d</td><td class="g">bhur dteach</td></tr>
+    <tr><td class="g">n- + vowel</td><td>n</td><td class="g">ár n-athair</td></tr>
+  </tbody></table></div>
+
+  <h2>Listening and looking things up</h2>
+  <p><a href="https://www.teanglann.ie/" target="_blank" rel="noopener">teanglann.ie</a> has the standard Irish–English dictionary, grammar tables for every word, and recordings in all three dialects. <a href="https://www.focloir.ie/" target="_blank" rel="noopener">focloir.ie</a> is the best English–Irish dictionary. <a href="https://abair.ie/" target="_blank" rel="noopener">abair.ie</a> will read any Irish text aloud in a dialect you choose. For real speech, try Raidió na Gaeltachta at <a href="https://www.rte.ie/rnag/" target="_blank" rel="noopener">rte.ie/rnag</a> and TG4 at <a href="https://www.tg4.ie/" target="_blank" rel="noopener">tg4.ie</a>.</p>
+  </div>`;
+}
+
+function renderProgress(){
+  const seen = Object.keys(state.items).filter(k => itemOf(k)).length;
+  const mastered = Object.keys(state.items).filter(k => itemOf(k) && state.items[k].box >= 4).length;
+  const total = UNITS.reduce((a, u) => a + u.items.length, 0);
+  return `<div class="stats">
+    <div class="stat"><b>${seen}</b><span>of ${total} items learned</span></div>
+    <div class="stat"><b>${mastered}</b><span>mastered (8+ day interval)</span></div>
+    <div class="stat"><b>${liveStreak()}</b><span>day streak</span></div>
+    <div class="stat"><b>${dueKeys().length}</b><span>due for review</span></div>
+  </div>
+  <div class="stagebars">${STAGES.map(s => {
+    const pts = s.units.reduce((a, u) => a + unitStats(u).pct * u.items.length, 0) / s.units.reduce((a, u) => a + u.items.length, 0);
+    return `<div><div class="lbl"><span><span class="ga">Céim ${s.id} · ${esc(s.ga)}</span> <span class="muted">${esc(s.en)}</span></span><span>${Math.round(pts)}%</span></div><div class="bar"><span style="width:${pts}%"></span></div></div>`;
+  }).join("")}</div>
+  <div class="settings">
+    <label for="unlockAll"><input type="checkbox" id="unlockAll" ${state.unlockAll ? "checked" : ""}><span><b>Unlock every lesson</b><br><span class="muted">Normally each lesson opens when you finish the one before. Turn this on if you already know the basics and want to jump ahead.</span></span></label>
+    <div><b>Your progress</b><br><span class="muted">Saved on this device. To move it to another device, export a progress file here and import it there.</span>
+      <div class="row" style="margin-top:10px"><button class="btn small" data-act="export">Export progress</button><label class="btn small" for="importFile" style="display:inline-flex">Import progress<input type="file" id="importFile" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div>
+      ${pendingImport ? `<div class="confirm" style="margin-top:12px"><p style="margin:0 0 10px">Replace the progress on this device with the imported file? It has ${Object.keys(pendingImport.items).length} learned items and ${Object.keys(pendingImport.done).length} finished lessons.</p><div class="row"><button class="btn small" data-act="import-yes" style="border-color:var(--bad);color:var(--bad)">Replace progress</button><button class="btn small" data-act="import-no">Cancel</button></div></div>` : ""}
+      ${ioMsg ? `<p class="muted" role="status" style="margin:10px 0 0">${esc(ioMsg)}</p>` : ""}
+    </div>
+    <div>${confirmReset
+      ? `<div class="confirm"><p style="margin:0 0 10px">Erase all progress, streaks and review history? This can't be undone.</p><div class="row"><button class="btn small" data-act="reset-yes" style="border-color:var(--bad);color:var(--bad)">Erase progress</button><button class="btn small" data-act="reset-no">Keep it</button></div></div>`
+      : `<button class="link" data-act="reset">Reset progress</button>`}</div>
+  </div>`;
+}
+
+function renderSession(){
+  const s = session, total = s.steps.length;
+  const top = `<div class="session-top"><button class="btn small" data-act="end">End</button><div class="bar"><span style="width:${(s.finished ? 1 : s.pos / total) * 100}%"></span></div><span class="ct">${Math.min(s.pos + (s.finished ? 0 : 1), total)} / ${total}</span></div>`;
+  if (s.finished) {
+    const pct = s.answered ? s.right / s.answered : 1;
+    const u = s.unit && UNIT_BY_ID[s.unit];
+    const nextU = u && UNITS[u.idx + 1] && unlocked(UNITS[u.idx + 1]) && !state.done[UNITS[u.idx + 1].id] ? UNITS[u.idx + 1] : null;
+    return top + `<section class="summary">
+      <h2>${pct >= .8 ? "Go hiontach!" : "Maith thú!"}</h2>
+      <p class="score">${pct >= .8 ? "Wonderful!" : "Well done!"} ${s.right} of ${s.answered} right first time.</p>
+      <p>${s.mode === "lesson" ? "These items will come back for review tomorrow. Anything you missed is due today." : "Each correct answer pushes that item's next review further out."}</p>
+      <div class="row" style="margin-top:20px">
+        ${nextU ? `<button class="btn primary" data-act="lesson" data-u="${nextU.idx}">Next: ${esc(nextU.ga)}</button>` : ""}
+        <button class="btn ${nextU ? "" : "primary"}" data-act="end">Back to path</button>
+      </div></section>`;
+  }
+  const st = s.steps[s.pos];
+  if (st.t === "rule") {
+    const u = UNIT_BY_ID[st.u];
+    return top + `<section class="stage-card">
+      <p class="eyebrow">Rule · Céim ${u.stage}</p>
+      <h2 class="prompt ga">${esc(u.ga)}</h2><p class="gloss">${esc(u.en)}</p>
+      <p class="rule-text">${esc(u.tip)}</p>
+      <ul class="examples">${u.items.slice(0, 4).map((r, i) => { const it = itemOf(keyOf(u, i)); return `<li><span class="from">${esc(it.prompt)}</span><span aria-hidden="true">→</span><span class="to">${highlight(it)}</span></li>`; }).join("")}</ul>
+      <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Start drills</button></div>
+    </section>`;
+  }
+  const it = itemOf(st.key);
+  if (st.t === "intro") {
+    const words = it.ga.split(/\s+/);
+    return top + `<section class="stage-card">
+      <p class="eyebrow">New ${words.length > 1 ? "phrase" : "word"} · ${esc(it.u.ga)}</p>
+      <div class="words ga">${words.map(w => { const c = w.replace(/[?!.,…]/g, ""); return c ? `<a href="${teanglann(c)}" target="_blank" rel="noopener" title="Hear “${esc(c)}” on teanglann.ie">${esc(w)}</a>` : esc(w); }).join(" ")}</div>
+      <p class="gloss" style="font-size:1.25rem;color:var(--ink)">${esc(it.en)}</p>
+      ${it.gaAll.length > 1 ? `<p class="gloss">Also: <span class="ga">${it.gaAll.slice(1).map(esc).join(", ")}</span></p>` : ""}
+      ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
+      ${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `<p class="hint">Tap a word to hear it spoken in all three dialects.</p>` : ""}
+      <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Next</button></div>
+    </section>`;
+  }
+  let body = "";
+  if (st.t === "mcq") {
+    const toGa = it.drill || st.dir === "en-ga";
+    body = `<p class="eyebrow">${it.drill ? esc(it.u.ask) : toGa ? "Choose the Irish" : "Choose the meaning"}</p>
+      ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : toGa ? `<p class="prompt en">${esc(it.en)}</p>` : `<p class="prompt ga">${esc(it.ga)}</p>`}
+      <div class="options">${s.opts.map((o, i) => {
+        let cls = toGa ? "opt ga" : "opt";
+        if (s.fb) { if (o.ok) cls += " right"; else if (s.fb.given === i) cls += " wrong"; }
+        return `<button class="${cls}" data-act="pick" data-i="${i}" ${s.fb ? "disabled" : ""}><span class="k">${i + 1}</span><span>${esc(o.text)}</span></button>`;
+      }).join("")}</div>`;
+  } else {
+    body = `<p class="eyebrow">${it.drill ? esc(it.u.ask) : "Write it in Irish"}</p>
+      ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : `<p class="prompt en">${esc(it.en)}</p>`}
+      <form class="typer" data-act="check" autocomplete="off">
+        <input id="answer" type="text" lang="ga" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Your answer in Irish" ${s.fb ? `disabled value="${esc(s.fb.givenText || "")}"` : ""}>
+        <div class="fadas"><span>Fada</span>${["á","é","í","ó","ú"].map(c => `<button type="button" data-act="fada" data-c="${c}" ${s.fb ? "disabled" : ""}>${c}</button>`).join("")}</div>
+        ${s.fb ? "" : `<div class="row"><button class="btn primary" type="submit">Check</button><button class="btn" type="button" data-act="giveup">I don't know</button></div>`}
+      </form>`;
+  }
+  return top + `<section class="stage-card">${body}${s.fb ? feedback(it) : ""}</section>`;
+}
+function feedback(it){
+  const fb = session.fb;
+  const words = speakWords(it).slice(0, 4);
+  return `<div class="feedback ${fb.ok ? "ok" : "no"}" role="status">
+    <h3>${fb.ok ? (fb.near ? "Ceart, but mind the fada" : "Ceart! Right.") : "Not quite. The answer is:"}</h3>
+    <p class="ans">${highlight(it)}</p>
+    <p class="sub">${esc(it.en)}${it.drill && it.note ? " · " + esc(it.note) : ""}</p>
+    ${!it.drill && it.note ? `<p class="sub">${esc(it.note)}</p>` : ""}
+    ${words.length ? `<p class="listen">Hear it: ${words.map(w => `<a href="${teanglann(w)}" target="_blank" rel="noopener">${esc(w)}</a>`).join("")}</p>` : ""}
+    <div class="row"><span class="hint">Press Enter to continue</span><button class="btn primary" data-act="next" data-autofocus>Continue</button></div>
+  </div>`;
+}
+function afterRender(){
+  const af = app.querySelector("[data-autofocus]");
+  const inp = app.querySelector("#answer:not([disabled])");
+  if (inp) inp.focus({ preventScroll:true });
+  else if (af) af.focus({ preventScroll:true });
+}
+
+/* ---------------- Events ---------------- */
+app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || b.tagName === "FORM") return;
+  const a = b.dataset.act;
+  if (a === "tab") { view = b.dataset.v; confirmReset = false; ioMsg = ""; pendingImport = null; try { localStorage.setItem(LS_KEY + "-view", view); } catch (err) {} render(); }
+  else if (a === "lesson") startLesson(+b.dataset.u);
+  else if (a === "practice") practiceUnit(+b.dataset.u);
+  else if (a === "review") startReview(dueKeys(), "Review");
+  else if (a === "weak") startReview(weakKeys(), "Practice");
+  else if (a === "next") next();
+  else if (a === "end") endSession();
+  else if (a === "pick" && !session.fb) { const i = +b.dataset.i; const ok = session.opts[i].ok; grade(ok, i); }
+  else if (a === "giveup" && !session.fb) { session.lastTyped = ""; grade(false, -1); }
+  else if (a === "fada") { const inp = document.getElementById("answer"); if (inp) { const s0 = inp.selectionStart ?? inp.value.length, s1 = inp.selectionEnd ?? s0; inp.value = inp.value.slice(0, s0) + b.dataset.c + inp.value.slice(s1); inp.focus(); inp.setSelectionRange(s0 + 1, s0 + 1); } }
+  else if (a === "export") exportProgress();
+  else if (a === "import-yes") { state = pendingImport; pendingImport = null; ioMsg = "Progress imported."; commit(); render(); }
+  else if (a === "import-no") { pendingImport = null; render(); }
+  else if (a === "reset") { confirmReset = true; render(); }
+  else if (a === "reset-no") { confirmReset = false; render(); }
+  else if (a === "reset-yes") { state = blank(); confirmReset = false; commit(); render(); }
+});
+app.addEventListener("submit", e => {
+  e.preventDefault();
+  if (!session || session.fb) return;
+  const inp = document.getElementById("answer"); const v = inp.value;
+  if (!v.trim()) { inp.focus(); return; }
+  const it = itemOf(session.steps[session.pos].key);
+  const exact = it.gaAll.some(a => norm(a) === norm(v));
+  const near = !exact && it.gaAll.some(a => fold(a) === fold(v));
+  grade(exact || near, -1, near);
+  session.fb.givenText = v; render();
+});
+app.addEventListener("change", e => {
+  if (e.target.id === "unlockAll") { state.unlockAll = e.target.checked; commit(); }
+  if (e.target.id === "importFile" && e.target.files[0]) { importProgress(e.target.files[0]); e.target.value = ""; }
+});
+document.addEventListener("keydown", e => {
+  if (!session || e.metaKey || e.ctrlKey || e.altKey) return;
+  const st = session.steps[session.pos];
+  if (session.fb && e.key === "Enter") { e.preventDefault(); next(); return; }
+  if (!session.fb && st && st.t === "mcq" && /^[1-4]$/.test(e.key)) { const i = +e.key - 1; if (session.opts[i]) grade(session.opts[i].ok, i); }
+  if (e.key === "Escape") endSession();
+});
+
+render();
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+}
+// Pick up changes made in another tab or window of the app.
+window.addEventListener("storage", e => {
+  if (e.key !== LS_KEY || session) return;
+  try { const s = JSON.parse(e.newValue); if (s && s.v === 1) { state = Object.assign(blank(), s); render(); } } catch (err) {}
+});
+</script>
+</body>
+</html>
