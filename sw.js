@@ -1,6 +1,6 @@
 // Foghlaim service worker: makes the app work offline.
 // When you change any file, bump VERSION so installed copies pick up the update.
-const VERSION = "foghlaim-v6";
+const VERSION = "foghlaim-v7";
 const AUDIO = "foghlaim-audio"; // spoken phrases from abair.ie, kept across updates
 const SHELL = [
   "./",

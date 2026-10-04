@@ -66,10 +66,16 @@ After you've opened the app once online, lessons, review and the Sounds guide wo
 
 ## Updating the app yourself
 
-If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v6"` (to `foghlaim-v7` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
+If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v7"` (to `foghlaim-v8` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
 
 ## Going further: store packages
 
 Once the app is online you can turn it into real store packages for free at https://www.pwabuilder.com. Paste your app's address and it generates:
 - an **Android** package (`.apk` to install directly, or `.aab` for the Google Play Store, which has a one-time $25 developer fee), and
 - a **Windows** package (`.msix`) for the Microsoft Store or direct install.
+
+## Copyright and credits
+
+© 2026 A. Hogrelius. All rights reserved. The app's design, code and course content may not be copied, republished or sold without permission.
+
+Spoken Irish is produced by ABAIR (abair.ie), Phonetics and Speech Laboratory, Trinity College Dublin, and used under ABAIR's terms for personal, educational and non-commercial purposes. This project is not affiliated with or endorsed by ABAIR or Trinity College Dublin. Typefaces: Uncial Antiqua (Astigmatic), Literata (TypeTogether) and Atkinson Hyperlegible (Braille Institute of America), all under the SIL Open Font License 1.1. Full credits are in the app's **Credits** tab.

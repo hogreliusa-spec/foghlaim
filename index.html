@@ -54,10 +54,11 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 .streak{display:flex;gap:14px;font-size:.9rem;color:var(--muted);font-variant-numeric:tabular-nums}
 .streak b{color:var(--ink);font-size:1.05rem}
 .streak .hot b{color:var(--gorse)}
-nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
+nav.tabs{display:flex;flex-wrap:wrap;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px}
 nav.tabs button{background:none;border:0;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;font-weight:700;font-size:.95rem}
 nav.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
-@media (max-width:480px){nav.tabs{gap:0;justify-content:space-between}nav.tabs button{padding:10px 4px;font-size:.85rem}nav.tabs .count{margin-left:3px;padding:0 5px}}
+/* Narrow screens: two rows of three tabs */
+@media (max-width:560px){nav.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0}nav.tabs button{padding:10px 4px;font-size:.9rem;text-align:center}nav.tabs .count{margin-left:4px;padding:0 5px}}
 nav.tabs .count{display:inline-block;min-width:1.5em;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:.78rem;font-variant-numeric:tabular-nums}
 
 /* buttons */
@@ -184,6 +185,7 @@ form.typer input:focus{border-color:var(--accent);outline:none}
 .prose{max-width:66ch}
 .prose h2{font-family:var(--f-display);font-weight:400;font-size:1.5rem;margin:32px 0 6px}
 .prose h2:first-child{margin-top:0}
+.prose ul{padding-left:1.2em;display:grid;gap:6px}
 .tbl{overflow-x:auto;margin:12px 0}
 table{border-collapse:collapse;width:100%;font-size:.95rem}
 th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
@@ -595,7 +597,7 @@ function highlight(it){
 
 /* ---------------- Sessions ---------------- */
 let view = "path", session = null, confirmReset = false;
-try { const v = localStorage.getItem(LS_KEY + "-view"); if (["path","review","sounds","progress","settings"].includes(v)) view = v; } catch (e) {}
+try { const v = localStorage.getItem(LS_KEY + "-view"); if (["path","review","sounds","progress","settings","credits"].includes(v)) view = v; } catch (e) {}
 
 function exerciseFor(key, mode){
   const it = itemOf(key), r = rec(key), box = r ? r.box : 0;
@@ -709,9 +711,9 @@ function renderShell(){
     <div class="streak"><span class="${st ? "hot" : ""}"><b>${st}</b> day streak</span><span><b>${todayCount()}</b>/${GOAL} today</span></div>
   </header>
   <nav class="tabs" aria-label="Sections">
-    ${tab("path", "Path")}${tab("review", "Review", due ? `<span class="count">${due}</span>` : "")}${tab("sounds", "Sounds")}${tab("progress", "Progress")}${tab("settings", "Settings")}
+    ${tab("path", "Path")}${tab("review", "Review", due ? `<span class="count">${due}</span>` : "")}${tab("sounds", "Sounds")}${tab("progress", "Progress")}${tab("settings", "Settings")}${tab("credits", "Credits")}
   </nav>
-  <main>${view === "path" ? renderPath() : view === "review" ? renderReview() : view === "sounds" ? renderSounds() : view === "settings" ? renderSettings() : renderProgress()}</main>`;
+  <main>${view === "path" ? renderPath() : view === "review" ? renderReview() : view === "sounds" ? renderSounds() : view === "settings" ? renderSettings() : view === "credits" ? renderCredits() : renderProgress()}</main>`;
 }
 
 function renderPath(){
@@ -839,6 +841,39 @@ function renderProgress(){
     return `<div><div class="lbl"><span><span class="ga">Céim ${s.id} · ${esc(s.ga)}</span> <span class="muted">${esc(s.en)}</span></span><span>${Math.round(pts)}%</span></div><div class="bar"><span style="width:${pts}%"></span></div></div>`;
   }).join("")}</div>
 `;
+}
+
+const APP_VERSION = "1.7";
+function renderCredits(){
+  const link = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
+  return `<div class="prose credits">
+  <h2>Copyright</h2>
+  <p><b>Foghlaim Gaeilge</b>, version ${APP_VERSION}<br>© 2026 A. Hogrelius. All rights reserved.</p>
+  <p>The app's design, code and course content (the lessons, word lists, grammar drills, notes and the pronunciation guide) are the work of A. Hogrelius. You're welcome to use the app to learn Irish. Please don't copy, republish or sell its code or course content without permission.</p>
+
+  <h2>Pronunciation: ABAIR</h2>
+  <p>All spoken Irish in this app is produced by the ${link("https://abair.ie/", "ABAIR")} speech synthesiser, developed by the Phonetics and Speech Laboratory at Trinity College Dublin. The voices are ABAIR's own: Sibéal and Pádraig (Connemara), Neasa and Colm (Munster), and Áine and Dónall (Ulster).</p>
+  <p>ABAIR technology and voices © Phonetics and Speech Laboratory, Trinity College Dublin. All rights reserved. The audio is fetched from ABAIR each time a phrase is first played, and kept only on your own device so it can replay offline. Under ${link("https://abair.ie/terms", "ABAIR's terms of service")}, its audio may be used for personal, educational and non-commercial purposes. This app is free and non-commercial.</p>
+  <p class="muted">Foghlaim Gaeilge is an independent project and is not affiliated with or endorsed by ABAIR or Trinity College Dublin. Synthesised speech is very good but not perfect; if a word sounds odd, check it with a native speaker or a dictionary.</p>
+
+  <h2>Typefaces</h2>
+  <div class="tbl"><table><thead><tr><th>Typeface</th><th>Designer</th><th>Licence</th></tr></thead><tbody>
+    <tr><td>Uncial Antiqua</td><td>Astigmatic</td><td>SIL Open Font License 1.1</td></tr>
+    <tr><td>Literata</td><td>TypeTogether</td><td>SIL Open Font License 1.1</td></tr>
+    <tr><td>Atkinson Hyperlegible</td><td>Braille Institute of America</td><td>SIL Open Font License 1.1</td></tr>
+  </tbody></table></div>
+  <p class="muted">Served by ${link("https://fonts.google.com/", "Google Fonts")}.</p>
+
+  <h2>Language references</h2>
+  <p>Spelling and grammar follow the official standard, An Caighdeán Oifigiúil. The app links to these resources for further study; no content from them is included in the app:</p>
+  <ul>
+    <li>${link("https://www.teanglann.ie/", "teanglann.ie")} and ${link("https://www.focloir.ie/", "focloir.ie")}: Irish dictionaries published by Foras na Gaeilge</li>
+    <li>${link("https://www.rte.ie/rnag/", "RTÉ Raidió na Gaeltachta")} and ${link("https://www.tg4.ie/", "TG4")}: Irish-language radio and television</li>
+  </ul>
+
+  <h2>Acknowledgements</h2>
+  <p>Built with the help of Claude, an AI assistant made by Anthropic. Go raibh míle maith agaibh to everyone who keeps the Irish language and its technology alive.</p>
+  </div>`;
 }
 
 function renderSettings(){
