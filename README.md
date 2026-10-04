@@ -66,7 +66,7 @@ After you've opened the app once online, lessons, review and the Sounds guide wo
 
 ## Updating the app yourself
 
-If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v5"` (to `foghlaim-v6` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
+If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v6"` (to `foghlaim-v7` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
 
 ## Going further: store packages
 

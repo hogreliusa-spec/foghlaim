@@ -215,7 +215,7 @@ td.g{font-family:var(--f-ga);font-size:1.05rem;white-space:nowrap}
    drill item: [prompt, answer, english, rule, wrong1, wrong2]            */
 const STAGES = [
 { id:1, ga:"Bunús", en:"Basics", desc:"Everyday words and greetings. Learn to recognise them, then to produce them.", units:[
- { id:"greet", ga:"Beannachtaí", en:"Greetings & courtesies", kind:"vocab",
+ { id:"greet", ga:"Beannachtaí", en:"Greetings, yes & no", kind:"vocab",
    tip:"Irish greetings are blessings: Dia duit literally means “God to you”.",
    items:[
    ["Dia duit","Hello (to one person)","Literally “God to you”. The reply is Dia is Muire duit."],
@@ -231,7 +231,15 @@ const STAGES = [
    ["Oíche mhaith","Good night"],
    ["Cad is ainm duit?","What is your name?"],
    ["Is mise …","I am … (my name is)","Is mise Siobhán = I am Siobhán."],
-   ["Gabh mo leithscéal","Excuse me"]
+   ["Gabh mo leithscéal","Excuse me"],
+   ["Sea|Is ea","Yes (it is)","Irish has no single word for yes or no. You answer with the verb from the question. Sea (short for is ea) answers questions with is: An tusa Seán? Sea."],
+   ["Ní hea","No (it isn't)","The answer to a question with is: An tusa Máire? Ní hea."],
+   ["Tá","Yes (I am / there is)","Answers a question with An bhfuil…? An bhfuil tú go maith? Tá."],
+   ["Níl","No (I'm not / there isn't)","Answers An bhfuil…?: An bhfuil ocras ort? Níl."],
+   ["Cinnte","Certainly / sure","Said on its own as a reply: Cinnte! = Sure! / Of course!"],
+   ["Ceart go leor","OK / all right"],
+   ["B'fhéidir","Maybe"],
+   ["Sea, mhuise|Sé, mhuise|Sea, muise|Se, mhuise","Yes, for sure / Yes, indeed","Mhuise (or muise) means “indeed” and adds warmth or emphasis. It's especially common in Munster and Connacht. Some courses write the first word as Sé or Se, the way it sounds."]
  ]},
  { id:"num", ga:"Uimhreacha", en:"Numbers 0–10", kind:"vocab",
    tip:"These are counting numbers, said with a: a haon, a dó, a trí. With nouns they change (dhá chat = two cats), which comes later.",
@@ -604,10 +612,10 @@ function buildOptions(step){
   const others = shuffle(it.u.items.map((_, i) => itemOf(keyOf(it.u, i))).filter(o => o.key !== it.key && o[field] !== it[field])).slice(0, 3);
   return shuffle([it, ...others].map(o => ({ text:o[field], ok:o.key === it.key })));
 }
-function startLesson(idx){
+function startLesson(idx, onlyNew){
   const u = UNITS[idx], steps = [];
-  if (u.kind === "drill") steps.push({ t:"rule", u: u.id });
-  const keys = u.items.map((_, i) => keyOf(u, i));
+  if (u.kind === "drill" && !onlyNew) steps.push({ t:"rule", u: u.id });
+  const keys = u.items.map((_, i) => keyOf(u, i)).filter(k => !onlyNew || !rec(k));
   for (let c = 0; c < keys.length; c += 4) {
     const chunk = keys.slice(c, c + 4);
     if (u.kind !== "drill") chunk.forEach(k => steps.push({ t:"intro", key:k }));
@@ -708,6 +716,7 @@ function renderShell(){
 
 function renderPath(){
   const due = dueKeys().length;
+  const newIn = UNITS.find(u => state.done[u.id] && unitStats(u).seen < u.items.length);
   const nextU = UNITS.find(u => unlocked(u) && !state.done[u.id]);
   const tc = todayCount();
   const today = `
@@ -718,6 +727,7 @@ function renderPath(){
     </div>
     <div class="actions">
       ${due ? `<button class="btn" data-act="review">Review ${due} due</button>` : ""}
+      ${newIn ? `<button class="btn" data-act="learn-new" data-u="${newIn.idx}">${newIn.items.length - unitStats(newIn).seen} new in ${esc(newIn.ga)}</button>` : ""}
       ${nextU ? `<button class="btn primary" data-act="lesson" data-u="${nextU.idx}">${state.done[nextU.id] ? "Continue" : "Start lesson"}</button>` : `<button class="btn primary" data-act="weak">Practise weakest</button>`}
     </div>
     <div class="goal"><span>Daily goal</span><div class="bar"><span style="width:${Math.min(100, tc / GOAL * 100)}%"></span></div><span>${tc}/${GOAL} answers</span></div>
@@ -733,10 +743,11 @@ function renderPath(){
 }
 function unitRow(u){
   const st = unitStats(u), open = unlocked(u), done = !!state.done[u.id];
-  const status = !open ? "Locked" : !done ? (st.seen ? "In progress" : "New") : st.mastered === st.n ? "Mastered" : "Learning";
-  const cls = status === "Mastered" ? "mastered" : status === "Learning" ? "learning" : "";
+  const status = !open ? "Locked" : !done ? (st.seen ? "In progress" : "New") : st.seen < st.n ? "New words" : st.mastered === st.n ? "Mastered" : "Learning";
+  const cls = status === "Mastered" ? "mastered" : (status === "Learning" || status === "New words") ? "learning" : "";
   const btn = !open ? `<button class="btn small" disabled>Locked</button>`
     : !done ? `<button class="btn small primary" data-act="lesson" data-u="${u.idx}">Start</button>`
+    : st.seen < st.n ? `<button class="btn small primary" data-act="learn-new" data-u="${u.idx}">Learn ${st.n - st.seen} new</button>`
     : `<button class="btn small" data-act="practice" data-u="${u.idx}">Practise</button>`;
   return `<li class="unit ${open ? "" : "locked"}">
     <span class="num">${u.idx + 1}</span>
@@ -958,6 +969,7 @@ app.addEventListener("click", e => {
   if (a === "tab") { view = b.dataset.v; confirmReset = false; ioMsg = ""; pendingImport = null; try { localStorage.setItem(LS_KEY + "-view", view); } catch (err) {} render(); }
   else if (a === "lesson") startLesson(+b.dataset.u);
   else if (a === "practice") practiceUnit(+b.dataset.u);
+  else if (a === "learn-new") startLesson(+b.dataset.u, true);
   else if (a === "review") startReview(dueKeys(), "Review");
   else if (a === "weak") startReview(weakKeys(), "Practice");
   else if (a === "next") next();
