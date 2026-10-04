@@ -52,7 +52,7 @@ Progress is saved on each device. To carry it over:
 
 ## Pronunciation
 
-Irish words and phrases are spoken by the abair.ie speech synthesiser (Trinity College Dublin). New phrases play as they appear, and the answer plays after each question. Press the speaker button, or the P key, to hear it again. In the **Settings** tab you can choose the dialect (Connemara, Munster or Ulster) and a female or male voice, slow the speech down, or turn automatic playback off. Each phrase also has an **Open on abair.ie** link.
+Irish words and phrases are spoken by the abair.ie speech synthesiser (Trinity College Dublin). New phrases play as they appear, and the answer plays after each question. Press the speaker button, or the P key, to hear it again. In the **Settings** tab you can choose the dialect (Donegal, Connemara, Kerry or Ring, the same four areas as abair.ie) and a female or male voice, slow the speech down, or turn automatic playback off. Each phrase also has an **Open on abair.ie** link.
 
 ## Offline use
 
@@ -66,7 +66,7 @@ After you've opened the app once online, lessons, review and the Sounds guide wo
 
 ## Updating the app yourself
 
-If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v7"` (to `foghlaim-v8` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
+If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v8"` (to `foghlaim-v9` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
 
 ## Going further: store packages
 

@@ -136,9 +136,10 @@ ol.units{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .settings legend{font-weight:700;padding:0;margin-bottom:8px}
 .settings h2{font-family:var(--f-display);font-weight:400;font-size:1.5rem;margin:8px 0 0}
 .settings h2:first-child{margin-top:0}
-.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choices{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}
-@media (max-width:560px){.choices{grid-template-columns:1fr}.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:700px){.choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.choice.off{opacity:.55;cursor:default}
 .settings .choice{position:relative;display:flex;flex-direction:column;gap:2px;align-items:stretch;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;min-width:0}
 .choice input{position:absolute;opacity:0;width:1px;height:1px}
 .choice b{font-size:1.05rem}
@@ -513,18 +514,21 @@ function norm(s){ return s.toLowerCase().replace(/[’‘`´]/g, "'").replace(/[
 const fold = s => norm(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
 /* ---------------- Speech (abair.ie) ---------------- */
 const VOICES = [
-  { id:"Connemara-female", name:"Sibéal", dialect:"Connemara", label:"Connemara (Connacht)", gender:"female", voice:"ga_CO_snc_piper" },
-  { id:"Connemara-male",   name:"Pádraig", dialect:"Connemara", label:"Connemara (Connacht)", gender:"male", voice:"ga_CO_pmc_piper" },
-  { id:"Munster-female",   name:"Neasa", dialect:"Munster", label:"Munster", gender:"female", voice:"ga_MU_nnc_piper" },
-  { id:"Munster-male",     name:"Colm", dialect:"Munster", label:"Munster", gender:"male", voice:"ga_MU_cmg_piper" },
-  { id:"Ulster-female",    name:"Áine", dialect:"Ulster", label:"Ulster", gender:"female", voice:"ga_UL_anb_piper" },
-  { id:"Ulster-male",      name:"Dónall", dialect:"Ulster", label:"Ulster", gender:"male", voice:"ga_UL_doc_piper" }
+  { id:"Ulster-female",    name:"Áine",    dialect:"Ulster",    label:"Donegal (Ulster)",   gender:"female", voice:"ga_UL_anb_piper" },
+  { id:"Ulster-male",      name:"Dónall",  dialect:"Ulster",    label:"Donegal (Ulster)",   gender:"male",   voice:"ga_UL_doc_piper" },
+  { id:"Connemara-female", name:"Sibéal",  dialect:"Connemara", label:"Connemara (Connacht)", gender:"female", voice:"ga_CO_snc_piper" },
+  { id:"Connemara-male",   name:"Pádraig", dialect:"Connemara", label:"Connemara (Connacht)", gender:"male",   voice:"ga_CO_pmc_piper" },
+  { id:"Munster-female",   name:"Neasa",   dialect:"Munster",   label:"Kerry (Munster)",    gender:"female", voice:"ga_MU_nnc_piper" },
+  { id:"Munster-male",     name:"Colm",    dialect:"Munster",   label:"Kerry (Munster)",    gender:"male",   voice:"ga_MU_cmg_piper" },
+  { id:"Waterford-female", name:"Fianait", dialect:"Waterford", label:"Ring (Waterford)",   gender:"female", voice:"ga_MU_ar_fnm_piper" }
 ];
-const curVoice = () => VOICES.find(v => v.id === state.voice) || VOICES[0];
+const curVoice = () => VOICES.find(v => v.id === state.voice) || VOICES.find(v => v.id === "Connemara-female");
+// Same four areas, and the same names, as the abair.ie website. "dialect" is also abair.ie's own key.
 const DIALECTS = [
-  { id:"Connemara", name:"Connemara", region:"Connacht Irish, as spoken in the Galway Gaeltacht" },
-  { id:"Munster", name:"Munster", region:"Kerry, Cork and Waterford Gaeltachtaí" },
-  { id:"Ulster", name:"Ulster", region:"Donegal Irish" }
+  { id:"Ulster",    name:"Donegal",   region:"Ulster Irish, from the Donegal Gaeltacht" },
+  { id:"Connemara", name:"Connemara", region:"Connacht Irish, from the Galway Gaeltacht" },
+  { id:"Munster",   name:"Kerry",     region:"Munster Irish, from the Kerry Gaeltacht" },
+  { id:"Waterford", name:"Ring",      region:"An Rinn, Co. Waterford: Déise Irish, also part of Munster Irish" }
 ];
 const ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
 function sayText(t){ return String(t).replace(/…/g, "").replace(/\s+/g, " ").trim(); }
@@ -843,7 +847,7 @@ function renderProgress(){
 `;
 }
 
-const APP_VERSION = "1.7";
+const APP_VERSION = "1.8";
 function renderCredits(){
   const link = (href, text) => `<a href="${href}" target="_blank" rel="noopener">${text}</a>`;
   return `<div class="prose credits">
@@ -852,7 +856,7 @@ function renderCredits(){
   <p>The app's design, code and course content (the lessons, word lists, grammar drills, notes and the pronunciation guide) are the work of A. Hogrelius. You're welcome to use the app to learn Irish. Please don't copy, republish or sell its code or course content without permission.</p>
 
   <h2>Pronunciation: ABAIR</h2>
-  <p>All spoken Irish in this app is produced by the ${link("https://abair.ie/", "ABAIR")} speech synthesiser, developed by the Phonetics and Speech Laboratory at Trinity College Dublin. The voices are ABAIR's own: Sibéal and Pádraig (Connemara), Neasa and Colm (Munster), and Áine and Dónall (Ulster).</p>
+  <p>All spoken Irish in this app is produced by the ${link("https://abair.ie/", "ABAIR")} speech synthesiser, developed by the Phonetics and Speech Laboratory at Trinity College Dublin. The voices are ABAIR's own: Áine and Dónall (Donegal), Sibéal and Pádraig (Connemara), Neasa and Colm (Kerry), and Fianait (Ring).</p>
   <p>ABAIR technology and voices © Phonetics and Speech Laboratory, Trinity College Dublin. All rights reserved. The audio is fetched from ABAIR each time a phrase is first played, and kept only on your own device so it can replay offline. Under ${link("https://abair.ie/terms", "ABAIR's terms of service")}, its audio may be used for personal, educational and non-commercial purposes. This app is free and non-commercial.</p>
   <p class="muted">Foghlaim Gaeilge is an independent project and is not affiliated with or endorsed by ABAIR or Trinity College Dublin. Synthesised speech is very good but not perfect; if a word sounds odd, check it with a native speaker or a dictionary.</p>
 
@@ -881,10 +885,12 @@ function renderSettings(){
   const pair = g => VOICES.find(x => x.dialect === v.dialect && x.gender === g);
   return `<div class="settings">
     <h2>Dialect</h2>
-    <p class="muted" style="margin:0">Irish has three main dialects, and all of them are correct. Choose the one you want to hear and copy. Your choice is used for every spoken word in the app and for the abair.ie links.</p>
+    <p class="muted" style="margin:0">Irish has three main dialects (Ulster, Connacht and Munster), and all of them are correct. ABAIR has voices from four Gaeltacht areas; Kerry and Ring are both Munster Irish. Choose the one you want to hear and copy. Your choice is used for every spoken word in the app and for the abair.ie links.</p>
     <div class="choices" role="radiogroup" aria-label="Dialect">${DIALECTS.map(d => `<label class="choice" for="dialect-${d.id}"><input type="radio" name="dialect" id="dialect-${d.id}" value="${d.id}" ${d.id === v.dialect ? "checked" : ""}><b>${esc(d.name)}</b><span class="muted">${esc(d.region)}</span>${d.id === v.dialect ? `<span class="tick">Chosen</span>` : ""}</label>`).join("")}</div>
     <h2>Voice</h2>
-    <div class="choices two" role="radiogroup" aria-label="Voice">${["female","male"].map(g => { const x = pair(g); return `<label class="choice" for="gender-${g}"><input type="radio" name="gender" id="gender-${g}" value="${g}" ${g === v.gender ? "checked" : ""}><b>${esc(x.name)}</b><span class="muted">${g === "female" ? "Female" : "Male"} voice</span></label>`; }).join("")}</div>
+    <div class="choices two" role="radiogroup" aria-label="Voice">${["female","male"].map(g => { const x = pair(g); return x
+      ? `<label class="choice" for="gender-${g}"><input type="radio" name="gender" id="gender-${g}" value="${g}" ${g === v.gender ? "checked" : ""}><b>${esc(x.name)}</b><span class="muted">${g === "female" ? "Female" : "Male"} voice</span></label>`
+      : `<div class="choice off"><b>${g === "female" ? "Female" : "Male"} voice</b><span class="muted">ABAIR has no ${g} voice for ${esc(DIALECTS.find(d => d.id === v.dialect).name)} yet</span></div>`; }).join("")}</div>
     <div class="row"><button class="btn small" data-act="test-voice">Hear ${esc(v.name)}</button><span class="muted" style="font-size:.85rem">Voices from abair.ie. Each phrase needs an internet connection the first time it plays.</span></div>
     <p class="audio-msg" id="audioMsg" role="status" hidden></p>
     <label for="autoplay"><input type="checkbox" id="autoplay" ${state.autoplay ? "checked" : ""}><span><b>Play Irish automatically</b><br><span class="muted">New words and phrases are spoken when they appear, and every answer is spoken after you reply.</span></span></label>
@@ -940,7 +946,7 @@ function renderSession(){
       ${it.gaAll.length > 1 ? `<p class="gloss">Also: ${it.gaAll.slice(1).map(sayWordBtn).join(", ")}</p>` : ""}
       ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
       <p class="audio-msg" id="audioMsg" role="status" hidden></p>
-      <p class="hint">${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `Dialect: ${esc(curVoice().dialect)} (${esc(curVoice().name)}). Change it in Settings. · ` : ""}<a class="abair" href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
+      <p class="hint">${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `Dialect: ${esc(curVoice().label)}, ${esc(curVoice().name)}. Change it in Settings. · ` : ""}<a class="abair" href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
       <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Next</button></div>
     </section>`;
   }
@@ -1038,7 +1044,8 @@ app.addEventListener("change", e => {
   if (e.target.name === "dialect" || e.target.name === "gender") {
     const v = curVoice();
     const d = e.target.name === "dialect" ? e.target.value : v.dialect, g = e.target.name === "gender" ? e.target.value : v.gender;
-    state.voice = d + "-" + g; commit(); render(); say("Dia duit. Conas atá tú?");
+    const pick = VOICES.find(x => x.dialect === d && x.gender === g) || VOICES.find(x => x.dialect === d);
+    state.voice = pick.id; commit(); render(); say("Dia duit. Conas atá tú?");
   }
   if (e.target.id === "autoplay") { state.autoplay = e.target.checked; commit(); }
   if (e.target.id === "slowSpeech") { state.slow = e.target.checked; commit(); }
