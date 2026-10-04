@@ -46,13 +46,13 @@ Open the address in Safari, tap **Share** → **Add to Home Screen**.
 ## Moving progress between devices
 
 Progress is saved on each device. To carry it over:
-1. On the first device, open **Progress → Export progress**. This saves a small `.json` file.
+1. On the first device, open **Settings → Export progress**. This saves a small `.json` file.
 2. Send the file to the other device (email, cloud drive, USB).
-3. On the other device, open **Progress → Import progress** and choose the file.
+3. On the other device, open **Settings → Import progress** and choose the file.
 
 ## Pronunciation
 
-Irish words and phrases are spoken by the abair.ie speech synthesiser (Trinity College Dublin). New phrases play as they appear, and the answer plays after each question. Press the speaker button, or the P key, to hear it again. Under **Progress → Pronunciation** you can pick a voice (Connemara, Munster or Ulster; female or male), slow the speech down, or turn automatic playback off. Each phrase also has an **Open on abair.ie** link.
+Irish words and phrases are spoken by the abair.ie speech synthesiser (Trinity College Dublin). New phrases play as they appear, and the answer plays after each question. Press the speaker button, or the P key, to hear it again. In the **Settings** tab you can choose the dialect (Connemara, Munster or Ulster) and a female or male voice, slow the speech down, or turn automatic playback off. Each phrase also has an **Open on abair.ie** link.
 
 ## Offline use
 
@@ -66,7 +66,7 @@ After you've opened the app once online, lessons, review and the Sounds guide wo
 
 ## Updating the app yourself
 
-If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v2"` (to `foghlaim-v3` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
+If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v5"` (to `foghlaim-v6` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
 
 ## Going further: store packages
 

@@ -57,6 +57,7 @@ header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:1
 nav.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-bottom:24px;overflow-x:auto}
 nav.tabs button{background:none;border:0;padding:10px 14px;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;font-weight:700;font-size:.95rem}
 nav.tabs button[aria-current="page"]{color:var(--ink);border-bottom-color:var(--accent)}
+@media (max-width:480px){nav.tabs{gap:0;justify-content:space-between}nav.tabs button{padding:10px 4px;font-size:.85rem}nav.tabs .count{margin-left:3px;padding:0 5px}}
 nav.tabs .count{display:inline-block;min-width:1.5em;padding:0 6px;margin-left:6px;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-size:.78rem;font-variant-numeric:tabular-nums}
 
 /* buttons */
@@ -69,6 +70,7 @@ nav.tabs .count{display:inline-block;min-width:1.5em;padding:0 6px;margin-left:6
 /* today */
 .today{display:grid;grid-template-columns:1fr auto;gap:16px 24px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:36px}
 .today .eyebrow{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700}
+.again{display:inline-block;margin-right:8px;padding:1px 8px;border-radius:99px;background:var(--bad-soft);color:var(--bad);letter-spacing:.06em}
 .today .next{font-size:1.5rem;margin:2px 0 0}
 .today .next small{font-family:var(--f-ui);font-size:.95rem;color:var(--muted);margin-left:8px}
 .today .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
@@ -131,6 +133,18 @@ ol.units{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .settings select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
 .settings fieldset{border:0;padding:0;margin:0;display:grid;gap:12px}
 .settings legend{font-weight:700;padding:0;margin-bottom:8px}
+.settings h2{font-family:var(--f-display);font-weight:400;font-size:1.5rem;margin:8px 0 0}
+.settings h2:first-child{margin-top:0}
+.choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+@media (max-width:560px){.choices{grid-template-columns:1fr}.choices.two{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.settings .choice{position:relative;display:flex;flex-direction:column;gap:2px;align-items:stretch;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface);cursor:pointer;min-width:0}
+.choice input{position:absolute;opacity:0;width:1px;height:1px}
+.choice b{font-size:1.05rem}
+.choice .muted{font-size:.85rem}
+.choice:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
+.choice:has(input:focus-visible){outline:3px solid var(--accent);outline-offset:2px}
+.choice .tick{position:absolute;top:10px;right:12px;font-size:.75rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.06em}
 .hint{font-size:.85rem;color:var(--muted)}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
 @media (max-width:560px){.options{grid-template-columns:1fr}}
@@ -497,6 +511,11 @@ const VOICES = [
   { id:"Ulster-male",      name:"Dónall", dialect:"Ulster", label:"Ulster", gender:"male", voice:"ga_UL_doc_piper" }
 ];
 const curVoice = () => VOICES.find(v => v.id === state.voice) || VOICES[0];
+const DIALECTS = [
+  { id:"Connemara", name:"Connemara", region:"Connacht Irish, as spoken in the Galway Gaeltacht" },
+  { id:"Munster", name:"Munster", region:"Kerry, Cork and Waterford Gaeltachtaí" },
+  { id:"Ulster", name:"Ulster", region:"Donegal Irish" }
+];
 const ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
 function sayText(t){ return String(t).replace(/…/g, "").replace(/\s+/g, " ").trim(); }
 function abairLink(t){ const v = curVoice(); return "https://abair.ie/synthesis?text=" + encodeURIComponent(sayText(t)) + "&dialect=" + v.dialect + "&gender=" + v.gender; }
@@ -568,7 +587,7 @@ function highlight(it){
 
 /* ---------------- Sessions ---------------- */
 let view = "path", session = null, confirmReset = false;
-try { const v = localStorage.getItem(LS_KEY + "-view"); if (["path","review","sounds","progress"].includes(v)) view = v; } catch (e) {}
+try { const v = localStorage.getItem(LS_KEY + "-view"); if (["path","review","sounds","progress","settings"].includes(v)) view = v; } catch (e) {}
 
 function exerciseFor(key, mode){
   const it = itemOf(key), r = rec(key), box = r ? r.box : 0;
@@ -631,16 +650,33 @@ function grade(ok, given, near){
     r.wrong++; r.box = session.mode === "lesson" ? 0 : 1; r.due = t;
     session.missed[key] = true;
     session.retries[key] = (session.retries[key] || 0) + 1;
-    if (session.retries[key] <= 2) {
-      const again = st.t === "type" ? { t:"mcq", dir:"en-ga", key } : Object.assign({}, st);
-      session.steps.push(again);
-    }
+    // First miss: the question comes back several times, scattered through the rest of the session.
+    // A miss on one of those repeats adds one more, a little later.
+    if (session.retries[key] === 1) scheduleRepeats(st, session.mode === "lesson" ? 3 : 2);
+    else if (session.retries[key] <= 4) scheduleRepeats(st, 1);
   }
   if (first) session.answered++;
   state.items[key] = r;
   bumpDay(); commit();
   session.fb = { ok, given, near };
   render();
+}
+function scheduleRepeats(st, count){
+  const isQ = x => x.t !== "intro" && x.t !== "rule";
+  const qIdx = [];
+  for (let i = session.pos + 1; i < session.steps.length; i++) if (isQ(session.steps[i])) qIdx.push(i);
+  const R = qIdx.length, rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+  // k = how many upcoming questions to let pass before the repeat
+  const ks = [Math.min(R, rnd(2, 4))];
+  for (let c = 1; c < count; c++) {
+    const lo = ks[ks.length - 1] + 2;
+    if (lo > R) break;
+    ks.push(rnd(lo, Math.max(lo, R - (count - 1 - c) * 2)));
+  }
+  ks.sort((a, b) => b - a).forEach(k => {
+    const at = k === 0 ? session.pos + 1 : k < R ? qIdx[k - 1] + 1 : session.steps.length;
+    session.steps.splice(at, 0, Object.assign({}, st, { retry:true }));
+  });
 }
 function next(){
   session.pos++;
@@ -665,9 +701,9 @@ function renderShell(){
     <div class="streak"><span class="${st ? "hot" : ""}"><b>${st}</b> day streak</span><span><b>${todayCount()}</b>/${GOAL} today</span></div>
   </header>
   <nav class="tabs" aria-label="Sections">
-    ${tab("path", "Path")}${tab("review", "Review", due ? `<span class="count">${due}</span>` : "")}${tab("sounds", "Sounds")}${tab("progress", "Progress")}
+    ${tab("path", "Path")}${tab("review", "Review", due ? `<span class="count">${due}</span>` : "")}${tab("sounds", "Sounds")}${tab("progress", "Progress")}${tab("settings", "Settings")}
   </nav>
-  <main>${view === "path" ? renderPath() : view === "review" ? renderReview() : view === "sounds" ? renderSounds() : renderProgress()}</main>`;
+  <main>${view === "path" ? renderPath() : view === "review" ? renderReview() : view === "sounds" ? renderSounds() : view === "settings" ? renderSettings() : renderProgress()}</main>`;
 }
 
 function renderPath(){
@@ -731,7 +767,7 @@ function renderSounds(){
 function soundsHtml(){
   return `<div class="prose">
   <h2>How Irish spelling sounds</h2>
-  <p>Irish spelling looks long, but it's regular once you know a few rules. These notes follow the written standard; pronunciation differs between Connacht, Munster and Ulster, and every one is correct. Pick the dialect you hear most and copy it. Tap any underlined Irish word on this page to hear it. The voice comes from abair.ie and follows the dialect you choose under Progress.</p>
+  <p>Irish spelling looks long, but it's regular once you know a few rules. These notes follow the written standard; pronunciation differs between Connacht, Munster and Ulster, and every one is correct. Pick the dialect you hear most and copy it. Tap any underlined Irish word on this page to hear it. The voice comes from abair.ie and follows the dialect you choose in Settings.</p>
   <p class="audio-msg" id="audioMsg" role="status" hidden></p>
 
   <h2>The fada</h2>
@@ -791,17 +827,26 @@ function renderProgress(){
     const pts = s.units.reduce((a, u) => a + unitStats(u).pct * u.items.length, 0) / s.units.reduce((a, u) => a + u.items.length, 0);
     return `<div><div class="lbl"><span><span class="ga">Céim ${s.id} · ${esc(s.ga)}</span> <span class="muted">${esc(s.en)}</span></span><span>${Math.round(pts)}%</span></div><div class="bar"><span style="width:${pts}%"></span></div></div>`;
   }).join("")}</div>
-  <div class="settings">
-    <fieldset><legend>Pronunciation</legend>
-      <label for="voice" style="flex-direction:column;gap:6px"><span>Voice and dialect (from abair.ie)</span>
-        <select id="voice">${VOICES.map(v => `<option value="${v.id}" ${v.id === curVoice().id ? "selected" : ""}>${esc(v.name)}: ${esc(v.label)}, ${v.gender}</option>`).join("")}</select></label>
-      <label for="autoplay"><input type="checkbox" id="autoplay" ${state.autoplay ? "checked" : ""}><span><b>Play Irish automatically</b><br><span class="muted">New words and phrases are spoken when they appear, and every answer is spoken after you reply.</span></span></label>
-      <label for="slowSpeech"><input type="checkbox" id="slowSpeech" ${state.slow ? "checked" : ""}><span><b>Slower speech</b><br><span class="muted">Easier to follow while you're starting out.</span></span></label>
-      <div class="row"><button class="btn small" data-act="test-voice">Test voice</button><span class="muted" style="font-size:.85rem">Audio needs an internet connection the first time each phrase plays.</span></div>
-      <p class="audio-msg" id="audioMsg" role="status" hidden></p>
-    </fieldset>
+`;
+}
+
+function renderSettings(){
+  const v = curVoice();
+  const pair = g => VOICES.find(x => x.dialect === v.dialect && x.gender === g);
+  return `<div class="settings">
+    <h2>Dialect</h2>
+    <p class="muted" style="margin:0">Irish has three main dialects, and all of them are correct. Choose the one you want to hear and copy. Your choice is used for every spoken word in the app and for the abair.ie links.</p>
+    <div class="choices" role="radiogroup" aria-label="Dialect">${DIALECTS.map(d => `<label class="choice" for="dialect-${d.id}"><input type="radio" name="dialect" id="dialect-${d.id}" value="${d.id}" ${d.id === v.dialect ? "checked" : ""}><b>${esc(d.name)}</b><span class="muted">${esc(d.region)}</span>${d.id === v.dialect ? `<span class="tick">Chosen</span>` : ""}</label>`).join("")}</div>
+    <h2>Voice</h2>
+    <div class="choices two" role="radiogroup" aria-label="Voice">${["female","male"].map(g => { const x = pair(g); return `<label class="choice" for="gender-${g}"><input type="radio" name="gender" id="gender-${g}" value="${g}" ${g === v.gender ? "checked" : ""}><b>${esc(x.name)}</b><span class="muted">${g === "female" ? "Female" : "Male"} voice</span></label>`; }).join("")}</div>
+    <div class="row"><button class="btn small" data-act="test-voice">Hear ${esc(v.name)}</button><span class="muted" style="font-size:.85rem">Voices from abair.ie. Each phrase needs an internet connection the first time it plays.</span></div>
+    <p class="audio-msg" id="audioMsg" role="status" hidden></p>
+    <label for="autoplay"><input type="checkbox" id="autoplay" ${state.autoplay ? "checked" : ""}><span><b>Play Irish automatically</b><br><span class="muted">New words and phrases are spoken when they appear, and every answer is spoken after you reply.</span></span></label>
+    <label for="slowSpeech"><input type="checkbox" id="slowSpeech" ${state.slow ? "checked" : ""}><span><b>Slower speech</b><br><span class="muted">Easier to follow while you're starting out.</span></span></label>
+    <h2>Lessons</h2>
     <label for="unlockAll"><input type="checkbox" id="unlockAll" ${state.unlockAll ? "checked" : ""}><span><b>Unlock every lesson</b><br><span class="muted">Normally each lesson opens when you finish the one before. Turn this on if you already know the basics and want to jump ahead.</span></span></label>
-    <div><b>Your progress</b><br><span class="muted">Saved on this device. To move it to another device, export a progress file here and import it there.</span>
+    <h2>Your progress</h2>
+    <div><span class="muted">Saved on this device. To move it to another device, export a progress file here and import it there.</span>
       <div class="row" style="margin-top:10px"><button class="btn small" data-act="export">Export progress</button><label class="btn small" for="importFile" style="display:inline-flex">Import progress<input type="file" id="importFile" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div>
       ${pendingImport ? `<div class="confirm" style="margin-top:12px"><p style="margin:0 0 10px">Replace the progress on this device with the imported file? It has ${Object.keys(pendingImport.items).length} learned items and ${Object.keys(pendingImport.done).length} finished lessons.</p><div class="row"><button class="btn small" data-act="import-yes" style="border-color:var(--bad);color:var(--bad)">Replace progress</button><button class="btn small" data-act="import-no">Cancel</button></div></div>` : ""}
       ${ioMsg ? `<p class="muted" role="status" style="margin:10px 0 0">${esc(ioMsg)}</p>` : ""}
@@ -849,14 +894,14 @@ function renderSession(){
       ${it.gaAll.length > 1 ? `<p class="gloss">Also: ${it.gaAll.slice(1).map(sayWordBtn).join(", ")}</p>` : ""}
       ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
       <p class="audio-msg" id="audioMsg" role="status" hidden></p>
-      <p class="hint">${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `Voice: ${esc(curVoice().name)}, ${esc(curVoice().label)}. Change it under Progress. · ` : ""}<a class="abair" href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
+      <p class="hint">${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `Dialect: ${esc(curVoice().dialect)} (${esc(curVoice().name)}). Change it in Settings. · ` : ""}<a class="abair" href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
       <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Next</button></div>
     </section>`;
   }
   let body = "";
   if (st.t === "mcq") {
     const toGa = it.drill || st.dir === "en-ga";
-    body = `<p class="eyebrow">${it.drill ? esc(it.u.ask) : toGa ? "Choose the Irish" : "Choose the meaning"}</p>
+    body = `<p class="eyebrow">${st.retry ? `<span class="again">Again</span>` : ""}${it.drill ? esc(it.u.ask) : toGa ? "Choose the Irish" : "Choose the meaning"}</p>
       ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : toGa ? `<p class="prompt en">${esc(it.en)}</p>` : `<div class="heard">${sayBtn(it.ga)}<p class="prompt ga" style="margin:0">${esc(it.ga)}</p></div>`}
       <div class="options">${s.opts.map((o, i) => {
         let cls = toGa ? "opt ga" : "opt";
@@ -864,7 +909,7 @@ function renderSession(){
         return `<button class="${cls}" data-act="pick" data-i="${i}" ${s.fb ? "disabled" : ""}><span class="k">${i + 1}</span><span>${esc(o.text)}</span></button>`;
       }).join("")}</div>`;
   } else {
-    body = `<p class="eyebrow">${it.drill ? esc(it.u.ask) : "Write it in Irish"}</p>
+    body = `<p class="eyebrow">${st.retry ? `<span class="again">Again</span>` : ""}${it.drill ? esc(it.u.ask) : "Write it in Irish"}</p>
       ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : `<p class="prompt en">${esc(it.en)}</p>`}
       <form class="typer" data-act="check" autocomplete="off">
         <input id="answer" type="text" lang="ga" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Your answer in Irish" ${s.fb ? `disabled value="${esc(s.fb.givenText || "")}"` : ""}>
@@ -943,7 +988,11 @@ app.addEventListener("submit", e => {
 });
 app.addEventListener("change", e => {
   if (e.target.id === "unlockAll") { state.unlockAll = e.target.checked; commit(); }
-  if (e.target.id === "voice") { state.voice = e.target.value; commit(); say("Dia duit. Conas atá tú?"); }
+  if (e.target.name === "dialect" || e.target.name === "gender") {
+    const v = curVoice();
+    const d = e.target.name === "dialect" ? e.target.value : v.dialect, g = e.target.name === "gender" ? e.target.value : v.gender;
+    state.voice = d + "-" + g; commit(); render(); say("Dia duit. Conas atá tú?");
+  }
   if (e.target.id === "autoplay") { state.autoplay = e.target.checked; commit(); }
   if (e.target.id === "slowSpeech") { state.slow = e.target.checked; commit(); }
   if (e.target.id === "importFile" && e.target.files[0]) { importProgress(e.target.files[0]); e.target.value = ""; }
