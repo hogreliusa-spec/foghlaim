@@ -112,9 +112,25 @@ ol.units{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
 .prompt.en{font-family:var(--f-ui);font-weight:700;font-size:1.6rem}
 .gloss{color:var(--muted);font-size:1.05rem;margin:0 0 6px}
 .note{max-width:60ch;color:var(--ink);background:var(--surface);border-left:3px solid var(--gorse);padding:10px 14px;border-radius:0 8px 8px 0;margin:16px 0 0;font-size:.95rem}
-.words{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:2.2rem;line-height:1.25;margin:0 0 8px}
-.words a{color:var(--ink);text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:6px;text-decoration-thickness:2px}
-.words a:hover{text-decoration-color:var(--accent)}
+.heard{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 8px}
+.heard .words{font-size:2.2rem;line-height:1.25;margin:0}
+.say{flex:none;display:inline-grid;place-items:center;width:2.6rem;height:2.6rem;border-radius:50%;border:1.5px solid var(--accent);background:var(--surface);color:var(--accent);padding:0;vertical-align:middle}
+.say svg{width:1.2rem;height:1.2rem}
+.say.sm{width:2rem;height:2rem}.say.sm svg{width:.95rem;height:.95rem}
+.say:hover{background:var(--accent-soft)}
+.say.playing{background:var(--accent);color:var(--accent-ink)}
+.say.loading{border-style:dashed}
+@media (prefers-reduced-motion:no-preference){.say.playing{animation:pulse 1s ease-in-out infinite}.say.loading{animation:spin 1.2s linear infinite}}
+@keyframes pulse{50%{box-shadow:0 0 0 6px var(--accent-soft)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sayw{font:inherit;font-family:var(--f-ga);background:none;border:0;border-bottom:1.5px dotted var(--accent);padding:0;color:inherit;cursor:pointer}
+.sayw.playing{color:var(--accent)}
+.audio-msg{font-size:.85rem;color:var(--bad);margin:8px 0 0}
+.abair{font-size:.85rem}
+.ans-row{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.settings select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);max-width:100%}
+.settings fieldset{border:0;padding:0;margin:0;display:grid;gap:12px}
+.settings legend{font-weight:700;padding:0;margin-bottom:8px}
 .hint{font-size:.85rem;color:var(--muted)}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
 @media (max-width:560px){.options{grid-template-columns:1fr}}
@@ -410,7 +426,7 @@ STAGES.forEach(s => s.units.forEach(u => { u.stage = s.id; u.idx = UNITS.length;
 const LS_KEY = "foghlaim-gaeilge-v1";
 const INTERVALS = [0,1,2,4,8,16,32];
 const GOAL = 20;
-function blank(){ return { v:1, items:{}, done:{}, streak:0, lastDay:null, countDay:null, todayCount:0, unlockAll:false, updatedAt:0 }; }
+function blank(){ return { v:1, items:{}, done:{}, streak:0, lastDay:null, countDay:null, todayCount:0, unlockAll:false, voice:"Connemara-female", autoplay:true, slow:false, updatedAt:0 }; }
 function today(){ const d = new Date(); return Math.round(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 864e5); }
 let state = blank();
 try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (s && s.v === 1) state = Object.assign(blank(), s); } catch (e) {}
@@ -471,13 +487,73 @@ const liveStreak = () => (state.lastDay === today() || state.lastDay === today()
 const todayCount = () => state.countDay === today() ? state.todayCount : 0;
 function norm(s){ return s.toLowerCase().replace(/[’‘`´]/g, "'").replace(/[?!.,;:…"“”]/g, "").replace(/\s+/g, " ").trim(); }
 const fold = s => norm(s).normalize("NFD").replace(/[̀-ͯ]/g, "");
-function teanglann(w){ return "https://www.teanglann.ie/en/fuaim/" + encodeURIComponent(w.toLowerCase()); }
-function speakWords(it){
-  let src = it.drill ? (it.prompt.includes("+") ? it.prompt.split("+")[1] : it.prompt.split("(")[0]) : it.ga;
-  src = src.replace(/\(.*?\)/g, "").replace(/·.*/, "");
-  const words = src.split(/\s+/).map(w => w.replace(/[?!.,…]/g, "")).filter(Boolean);
-  return it.drill ? words.filter(w => !/^(an|a|mo|do|ár|bhur|i|the)$/i.test(w)) : words;
+/* ---------------- Speech (abair.ie) ---------------- */
+const VOICES = [
+  { id:"Connemara-female", name:"Sibéal", dialect:"Connemara", label:"Connemara (Connacht)", gender:"female", voice:"ga_CO_snc_piper" },
+  { id:"Connemara-male",   name:"Pádraig", dialect:"Connemara", label:"Connemara (Connacht)", gender:"male", voice:"ga_CO_pmc_piper" },
+  { id:"Munster-female",   name:"Neasa", dialect:"Munster", label:"Munster", gender:"female", voice:"ga_MU_nnc_piper" },
+  { id:"Munster-male",     name:"Colm", dialect:"Munster", label:"Munster", gender:"male", voice:"ga_MU_cmg_piper" },
+  { id:"Ulster-female",    name:"Áine", dialect:"Ulster", label:"Ulster", gender:"female", voice:"ga_UL_anb_piper" },
+  { id:"Ulster-male",      name:"Dónall", dialect:"Ulster", label:"Ulster", gender:"male", voice:"ga_UL_doc_piper" }
+];
+const curVoice = () => VOICES.find(v => v.id === state.voice) || VOICES[0];
+const ICON_SPEAK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5z" fill="currentColor"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+function sayText(t){ return String(t).replace(/…/g, "").replace(/\s+/g, " ").trim(); }
+function abairLink(t){ const v = curVoice(); return "https://abair.ie/synthesis?text=" + encodeURIComponent(sayText(t)) + "&dialect=" + v.dialect + "&gender=" + v.gender; }
+function sayBtn(t, small){ const x = sayText(t); return `<button type="button" class="say${small ? " sm" : ""}" data-act="say" data-say="${esc(x)}" aria-label="Play “${esc(x)}”" title="Play">${ICON_SPEAK}</button>`; }
+function sayWordBtn(t){ const x = sayText(t); return `<button type="button" class="sayw" data-act="say" data-say="${esc(x)}" title="Play">${esc(t)}</button>`; }
+
+const audioUrls = new Map(), audioPending = new Map();
+let audioEl = null, playingText = "", loadingText = "", audioMsg = "", sayToken = 0;
+function audioKey(text){ return curVoice().voice + "|" + (state.slow ? "s" : "n") + "|" + text; }
+function fetchAudio(text){
+  const key = audioKey(text);
+  if (audioUrls.has(key)) return Promise.resolve(audioUrls.get(key));
+  if (audioPending.has(key)) return audioPending.get(key);
+  const q = new URLSearchParams({ input:text, voice:curVoice().voice, normalise:"true" });
+  if (state.slow) q.append("speed", "1.4");
+  const p = fetch("https://synthesis.abair.ie/api/synthesise?" + q.toString())
+    .then(r => { if (!r.ok) throw new Error("http " + r.status); return r.json(); })
+    .then(j => {
+      if (!j || !j.audioContent) throw new Error("no audio");
+      const bin = atob(j.audioContent), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const url = URL.createObjectURL(new Blob([bytes], { type:"audio/wav" }));
+      audioUrls.set(key, url); return url;
+    })
+    .finally(() => audioPending.delete(key));
+  audioPending.set(key, p);
+  return p;
 }
+function prefetch(text){ text = sayText(text); if (text && navigator.onLine !== false) fetchAudio(text).catch(() => {}); }
+function markAudio(){
+  document.querySelectorAll("[data-act=say]").forEach(b => {
+    b.classList.toggle("playing", !!playingText && b.dataset.say === playingText);
+    b.classList.toggle("loading", !!loadingText && b.dataset.say === loadingText);
+  });
+  const m = document.getElementById("audioMsg"); if (m) { m.textContent = audioMsg; m.hidden = !audioMsg; }
+}
+function stopAudio(){ sayToken++; if (audioEl) { audioEl.pause(); audioEl = null; } playingText = loadingText = ""; markAudio(); }
+async function say(text){
+  text = sayText(text); if (!text) return;
+  const token = ++sayToken;
+  if (audioEl) { audioEl.pause(); audioEl = null; }
+  playingText = ""; loadingText = text; audioMsg = ""; markAudio();
+  try {
+    const url = await fetchAudio(text);
+    if (token !== sayToken) return;
+    const a = new Audio(url); audioEl = a;
+    loadingText = ""; playingText = text; markAudio();
+    a.onended = a.onerror = () => { if (audioEl === a) { audioEl = null; playingText = ""; markAudio(); } };
+    await a.play();
+  } catch (e) {
+    if (token !== sayToken) return;
+    loadingText = playingText = "";
+    audioMsg = (e && e.name === "NotAllowedError") ? "Tap the speaker button to play." : "Couldn't get audio from abair.ie. Check your internet connection, or use the abair.ie link.";
+    markAudio();
+  }
+}
+
 function highlight(it){
   if (!it.u.hl) return esc(it.ga);
   const base = it.prompt.split("+")[1].replace(/\(.*?\)/g, "").trim();
@@ -649,9 +725,14 @@ function renderReview(){
 }
 
 function renderSounds(){
+  return soundsHtml().replace(/<td class="g">([^<]+)<\/td><\/tr>/g, (m, t) => `<td class="g">${sayWordBtn(t)}</td></tr>`)
+    .replace(/<span class="ga">([^<]+)<\/span>/g, (m, t) => sayWordBtn(t));
+}
+function soundsHtml(){
   return `<div class="prose">
   <h2>How Irish spelling sounds</h2>
-  <p>Irish spelling looks long, but it's regular once you know a few rules. These notes follow the written standard; pronunciation differs between Connacht, Munster and Ulster, and every one is correct. Pick the dialect you hear most and copy it. In lessons, tap any Irish word to hear native speakers from all three on teanglann.ie.</p>
+  <p>Irish spelling looks long, but it's regular once you know a few rules. These notes follow the written standard; pronunciation differs between Connacht, Munster and Ulster, and every one is correct. Pick the dialect you hear most and copy it. Tap any underlined Irish word on this page to hear it. The voice comes from abair.ie and follows the dialect you choose under Progress.</p>
+  <p class="audio-msg" id="audioMsg" role="status" hidden></p>
 
   <h2>The fada</h2>
   <p>The accent (síneadh fada, “long mark”) lengthens a vowel and changes the meaning: <span class="ga">sean</span> means old, <span class="ga">Seán</span> is a name. Always write it.</p>
@@ -692,7 +773,7 @@ function renderSounds(){
   </tbody></table></div>
 
   <h2>Listening and looking things up</h2>
-  <p><a href="https://www.teanglann.ie/" target="_blank" rel="noopener">teanglann.ie</a> has the standard Irish–English dictionary, grammar tables for every word, and recordings in all three dialects. <a href="https://www.focloir.ie/" target="_blank" rel="noopener">focloir.ie</a> is the best English–Irish dictionary. <a href="https://abair.ie/" target="_blank" rel="noopener">abair.ie</a> will read any Irish text aloud in a dialect you choose. For real speech, try Raidió na Gaeltachta at <a href="https://www.rte.ie/rnag/" target="_blank" rel="noopener">rte.ie/rnag</a> and TG4 at <a href="https://www.tg4.ie/" target="_blank" rel="noopener">tg4.ie</a>.</p>
+  <p><a href="https://abair.ie/synthesis" target="_blank" rel="noopener">abair.ie</a>, from Trinity College Dublin, is where this app's voices come from; you can type any Irish there and hear it in each dialect. <a href="https://www.teanglann.ie/" target="_blank" rel="noopener">teanglann.ie</a> has the standard Irish–English dictionary and grammar tables for every word. <a href="https://www.focloir.ie/" target="_blank" rel="noopener">focloir.ie</a> is the best English–Irish dictionary. For real speech, try Raidió na Gaeltachta at <a href="https://www.rte.ie/rnag/" target="_blank" rel="noopener">rte.ie/rnag</a> and TG4 at <a href="https://www.tg4.ie/" target="_blank" rel="noopener">tg4.ie</a>.</p>
   </div>`;
 }
 
@@ -711,6 +792,14 @@ function renderProgress(){
     return `<div><div class="lbl"><span><span class="ga">Céim ${s.id} · ${esc(s.ga)}</span> <span class="muted">${esc(s.en)}</span></span><span>${Math.round(pts)}%</span></div><div class="bar"><span style="width:${pts}%"></span></div></div>`;
   }).join("")}</div>
   <div class="settings">
+    <fieldset><legend>Pronunciation</legend>
+      <label for="voice" style="flex-direction:column;gap:6px"><span>Voice and dialect (from abair.ie)</span>
+        <select id="voice">${VOICES.map(v => `<option value="${v.id}" ${v.id === curVoice().id ? "selected" : ""}>${esc(v.name)}: ${esc(v.label)}, ${v.gender}</option>`).join("")}</select></label>
+      <label for="autoplay"><input type="checkbox" id="autoplay" ${state.autoplay ? "checked" : ""}><span><b>Play Irish automatically</b><br><span class="muted">New words and phrases are spoken when they appear, and every answer is spoken after you reply.</span></span></label>
+      <label for="slowSpeech"><input type="checkbox" id="slowSpeech" ${state.slow ? "checked" : ""}><span><b>Slower speech</b><br><span class="muted">Easier to follow while you're starting out.</span></span></label>
+      <div class="row"><button class="btn small" data-act="test-voice">Test voice</button><span class="muted" style="font-size:.85rem">Audio needs an internet connection the first time each phrase plays.</span></div>
+      <p class="audio-msg" id="audioMsg" role="status" hidden></p>
+    </fieldset>
     <label for="unlockAll"><input type="checkbox" id="unlockAll" ${state.unlockAll ? "checked" : ""}><span><b>Unlock every lesson</b><br><span class="muted">Normally each lesson opens when you finish the one before. Turn this on if you already know the basics and want to jump ahead.</span></span></label>
     <div><b>Your progress</b><br><span class="muted">Saved on this device. To move it to another device, export a progress file here and import it there.</span>
       <div class="row" style="margin-top:10px"><button class="btn small" data-act="export">Export progress</button><label class="btn small" for="importFile" style="display:inline-flex">Import progress<input type="file" id="importFile" accept="application/json,.json" style="position:absolute;width:1px;height:1px;opacity:0"></label></div>
@@ -725,7 +814,7 @@ function renderProgress(){
 
 function renderSession(){
   const s = session, total = s.steps.length;
-  const top = `<div class="session-top"><button class="btn small" data-act="end">End</button><div class="bar"><span style="width:${(s.finished ? 1 : s.pos / total) * 100}%"></span></div><span class="ct">${Math.min(s.pos + (s.finished ? 0 : 1), total)} / ${total}</span></div>`;
+  const top = `<div class="session-top"><button class="btn small" data-act="end">End</button><div class="bar"><span style="width:${(s.finished ? 1 : s.pos / total) * 100}%"></span></div><span class="ct">${Math.min(s.pos + (s.finished ? 0 : 1), total)} / ${total}</span><button class="btn small" data-act="toggle-auto" aria-pressed="${state.autoplay}" title="Play Irish automatically">${state.autoplay ? "Sound on" : "Sound off"}</button></div>`;
   if (s.finished) {
     const pct = s.answered ? s.right / s.answered : 1;
     const u = s.unit && UNIT_BY_ID[s.unit];
@@ -746,7 +835,7 @@ function renderSession(){
       <p class="eyebrow">Rule · Céim ${u.stage}</p>
       <h2 class="prompt ga">${esc(u.ga)}</h2><p class="gloss">${esc(u.en)}</p>
       <p class="rule-text">${esc(u.tip)}</p>
-      <ul class="examples">${u.items.slice(0, 4).map((r, i) => { const it = itemOf(keyOf(u, i)); return `<li><span class="from">${esc(it.prompt)}</span><span aria-hidden="true">→</span><span class="to">${highlight(it)}</span></li>`; }).join("")}</ul>
+      <ul class="examples">${u.items.slice(0, 4).map((r, i) => { const it = itemOf(keyOf(u, i)); return `<li><span class="from">${esc(it.prompt)}</span><span aria-hidden="true">→</span><span class="to">${highlight(it)} ${sayBtn(it.ga, true)}</span></li>`; }).join("")}</ul>
       <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Start drills</button></div>
     </section>`;
   }
@@ -755,11 +844,12 @@ function renderSession(){
     const words = it.ga.split(/\s+/);
     return top + `<section class="stage-card">
       <p class="eyebrow">New ${words.length > 1 ? "phrase" : "word"} · ${esc(it.u.ga)}</p>
-      <div class="words ga">${words.map(w => { const c = w.replace(/[?!.,…]/g, ""); return c ? `<a href="${teanglann(c)}" target="_blank" rel="noopener" title="Hear “${esc(c)}” on teanglann.ie">${esc(w)}</a>` : esc(w); }).join(" ")}</div>
+      <div class="heard">${sayBtn(it.ga)}<p class="words ga">${esc(it.ga)}</p></div>
       <p class="gloss" style="font-size:1.25rem;color:var(--ink)">${esc(it.en)}</p>
-      ${it.gaAll.length > 1 ? `<p class="gloss">Also: <span class="ga">${it.gaAll.slice(1).map(esc).join(", ")}</span></p>` : ""}
+      ${it.gaAll.length > 1 ? `<p class="gloss">Also: ${it.gaAll.slice(1).map(sayWordBtn).join(", ")}</p>` : ""}
       ${it.note ? `<p class="note">${esc(it.note)}</p>` : ""}
-      ${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `<p class="hint">Tap a word to hear it spoken in all three dialects.</p>` : ""}
+      <p class="audio-msg" id="audioMsg" role="status" hidden></p>
+      <p class="hint">${s.pos === 0 || s.steps[s.pos - 1].t !== "intro" ? `Voice: ${esc(curVoice().name)}, ${esc(curVoice().label)}. Change it under Progress. · ` : ""}<a class="abair" href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
       <div class="row" style="margin-top:24px"><button class="btn primary" data-act="next" data-autofocus>Next</button></div>
     </section>`;
   }
@@ -767,7 +857,7 @@ function renderSession(){
   if (st.t === "mcq") {
     const toGa = it.drill || st.dir === "en-ga";
     body = `<p class="eyebrow">${it.drill ? esc(it.u.ask) : toGa ? "Choose the Irish" : "Choose the meaning"}</p>
-      ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : toGa ? `<p class="prompt en">${esc(it.en)}</p>` : `<p class="prompt ga">${esc(it.ga)}</p>`}
+      ${it.drill ? `<p class="prompt ga">${esc(it.prompt)}</p><p class="gloss">${esc(it.en)}</p>` : toGa ? `<p class="prompt en">${esc(it.en)}</p>` : `<div class="heard">${sayBtn(it.ga)}<p class="prompt ga" style="margin:0">${esc(it.ga)}</p></div>`}
       <div class="options">${s.opts.map((o, i) => {
         let cls = toGa ? "opt ga" : "opt";
         if (s.fb) { if (o.ok) cls += " right"; else if (s.fb.given === i) cls += " wrong"; }
@@ -786,17 +876,30 @@ function renderSession(){
 }
 function feedback(it){
   const fb = session.fb;
-  const words = speakWords(it).slice(0, 4);
   return `<div class="feedback ${fb.ok ? "ok" : "no"}" role="status">
     <h3>${fb.ok ? (fb.near ? "Ceart, but mind the fada" : "Ceart! Right.") : "Not quite. The answer is:"}</h3>
-    <p class="ans">${highlight(it)}</p>
+    <div class="ans-row">${sayBtn(it.ga)}<p class="ans">${highlight(it)}</p></div>
     <p class="sub">${esc(it.en)}${it.drill && it.note ? " · " + esc(it.note) : ""}</p>
     ${!it.drill && it.note ? `<p class="sub">${esc(it.note)}</p>` : ""}
-    ${words.length ? `<p class="listen">Hear it: ${words.map(w => `<a href="${teanglann(w)}" target="_blank" rel="noopener">${esc(w)}</a>`).join("")}</p>` : ""}
+    <p class="audio-msg" id="audioMsg" role="status" hidden></p>
+    <p class="listen"><a href="${abairLink(it.ga)}" target="_blank" rel="noopener">Open on abair.ie</a></p>
     <div class="row"><span class="hint">Press Enter to continue</span><button class="btn primary" data-act="next" data-autofocus>Continue</button></div>
   </div>`;
 }
 function afterRender(){
+  markAudio();
+  if (session && !session.finished) {
+    const st = session.steps[session.pos], tag = session.pos + (session.fb ? "f" : "s");
+    if (st && st.key && session.autoTag !== tag) {
+      session.autoTag = tag;
+      const it = itemOf(st.key);
+      const speakNow = session.fb || st.t === "intro" || (st.t === "mcq" && st.dir === "ga-en" && !it.drill);
+      if (speakNow && state.autoplay) say(it.ga); else if (!session.fb) stopAudio();
+      if (!speakNow) prefetch(it.ga);
+      const nx = session.steps[session.pos + 1];
+      if (nx && nx.key) prefetch(itemOf(nx.key).ga);
+    }
+  }
   const af = app.querySelector("[data-autofocus]");
   const inp = app.querySelector("#answer:not([disabled])");
   if (inp) inp.focus({ preventScroll:true });
@@ -813,10 +916,13 @@ app.addEventListener("click", e => {
   else if (a === "review") startReview(dueKeys(), "Review");
   else if (a === "weak") startReview(weakKeys(), "Practice");
   else if (a === "next") next();
-  else if (a === "end") endSession();
+  else if (a === "end") { stopAudio(); endSession(); }
   else if (a === "pick" && !session.fb) { const i = +b.dataset.i; const ok = session.opts[i].ok; grade(ok, i); }
   else if (a === "giveup" && !session.fb) { session.lastTyped = ""; grade(false, -1); }
   else if (a === "fada") { const inp = document.getElementById("answer"); if (inp) { const s0 = inp.selectionStart ?? inp.value.length, s1 = inp.selectionEnd ?? s0; inp.value = inp.value.slice(0, s0) + b.dataset.c + inp.value.slice(s1); inp.focus(); inp.setSelectionRange(s0 + 1, s0 + 1); } }
+  else if (a === "say") say(b.dataset.say);
+  else if (a === "toggle-auto") { state.autoplay = !state.autoplay; commit(); if (!state.autoplay) stopAudio(); render(); }
+  else if (a === "test-voice") say("Dia duit. Conas atá tú?");
   else if (a === "export") exportProgress();
   else if (a === "import-yes") { state = pendingImport; pendingImport = null; ioMsg = "Progress imported."; commit(); render(); }
   else if (a === "import-no") { pendingImport = null; render(); }
@@ -837,6 +943,9 @@ app.addEventListener("submit", e => {
 });
 app.addEventListener("change", e => {
   if (e.target.id === "unlockAll") { state.unlockAll = e.target.checked; commit(); }
+  if (e.target.id === "voice") { state.voice = e.target.value; commit(); say("Dia duit. Conas atá tú?"); }
+  if (e.target.id === "autoplay") { state.autoplay = e.target.checked; commit(); }
+  if (e.target.id === "slowSpeech") { state.slow = e.target.checked; commit(); }
   if (e.target.id === "importFile" && e.target.files[0]) { importProgress(e.target.files[0]); e.target.value = ""; }
 });
 document.addEventListener("keydown", e => {
@@ -844,7 +953,8 @@ document.addEventListener("keydown", e => {
   const st = session.steps[session.pos];
   if (session.fb && e.key === "Enter") { e.preventDefault(); next(); return; }
   if (!session.fb && st && st.t === "mcq" && /^[1-4]$/.test(e.key)) { const i = +e.key - 1; if (session.opts[i]) grade(session.opts[i].ok, i); }
-  if (e.key === "Escape") endSession();
+  if (e.key === "Escape") { stopAudio(); endSession(); return; }
+  if (!session.fb && st && (e.key === "p" || e.key === "P") && document.activeElement?.id !== "answer") { const b = app.querySelector("[data-act=say]"); if (b) say(b.dataset.say); }
 });
 
 render();

@@ -50,13 +50,23 @@ Progress is saved on each device. To carry it over:
 2. Send the file to the other device (email, cloud drive, USB).
 3. On the other device, open **Progress → Import progress** and choose the file.
 
+## Pronunciation
+
+Irish words and phrases are spoken by the abair.ie speech synthesiser (Trinity College Dublin). New phrases play as they appear, and the answer plays after each question. Press the speaker button, or the P key, to hear it again. Under **Progress → Pronunciation** you can pick a voice (Connemara, Munster or Ulster; female or male), slow the speech down, or turn automatic playback off. Each phrase also has an **Open on abair.ie** link.
+
 ## Offline use
 
-After you've opened the app once online, lessons, review and the Sounds guide work with no connection. The "tap a word to hear it" links go to teanglann.ie, so they need the internet.
+After you've opened the app once online, lessons, review and the Sounds guide work with no connection. Audio needs the internet the first time each phrase plays; after that it's saved and plays offline too.
 
-## Updating the app
+## Updating the copy on GitHub Pages
 
-If you change any file, open `sw.js` and change `foghlaim-v1` to `foghlaim-v2` (and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
+1. In your repository, click **Add file → Upload files**.
+2. Drag in the new `index.html`, `sw.js` and `README.md` (they replace the old ones) and click **Commit changes**.
+3. Wait a minute, then open the app and reload it once or twice. The new version takes over on the next launch.
+
+## Updating the app yourself
+
+If you change any file, open `sw.js` and raise the version number in `const VERSION = "foghlaim-v2"` (to `foghlaim-v3` and so on), then upload again. Installed copies pick up the new version the next time they're opened with a connection, and show it on the launch after that.
 
 ## Going further: store packages
 
